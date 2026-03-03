@@ -1,0 +1,963 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* ===== About Page Styles ===== */
+  .about-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  }
+
+  /* Hero */
+  .hero-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    margin-bottom: 4rem;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: #eff6ff;
+    border-radius: 9999px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-icon i {
+    font-size: 2.5rem;
+    color: #2563eb;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 48rem;
+    margin: 0 auto 1.5rem;
+  }
+
+  .badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .badge-blue {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-green {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .badge-purple {
+    background: #f3e8ff;
+    color: #6b21a8;
+  }
+
+  /* Mission */
+  .mission-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 4rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .mission-text {
+    font-size: 1.125rem;
+    color: #4b5563;
+    text-align: center;
+    max-width: 64rem;
+    margin: 0 auto;
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  /* Feature grid */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .feature-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: box-shadow 0.2s;
+  }
+
+  .feature-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    margin-bottom: 1rem;
+  }
+
+  .feature-icon i {
+    font-size: 1.5rem;
+  }
+
+  .feature-icon-blue {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+
+  .feature-icon-green {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .feature-icon-purple {
+    background: #f3e8ff;
+    color: #9333ea;
+  }
+
+  .feature-icon-yellow {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  .feature-icon-red {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .feature-icon-indigo {
+    background: #e0e7ff;
+    color: #4f46e5;
+  }
+
+  .feature-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-desc {
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+
+  /* Step by step (timeline) */
+  .timeline {
+    position: relative;
+    margin: 3rem 0 4rem;
+  }
+
+  .timeline-line {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .timeline-line {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e5e7eb;
+      transform: translateX(-50%);
+    }
+  }
+
+  .step-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  @media (min-width: 768px) {
+    .step-row {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+
+  .step-left,
+  .step-right {
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .step-left {
+      width: 50%;
+      padding-right: 2rem;
+      text-align: right;
+    }
+
+    .step-right {
+      width: 50%;
+      padding-left: 2rem;
+    }
+  }
+
+  .step-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .step-number-blue {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .step-number-green {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .step-number-purple {
+    background: #f3e8ff;
+    color: #6b21a8;
+  }
+
+  .step-number-yellow {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .step-number-pink {
+    background: #fce7f3;
+    color: #9d174d;
+  }
+
+  .step-number-indigo {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+
+  .step-number-teal {
+    background: #ccfbf1;
+    color: #115e59;
+  }
+
+  .step-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-desc {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  /* Sample dataset card */
+  .sample-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (min-width: 640px) {
+    .sample-card {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  .sample-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .sample-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 9999px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .sample-icon i {
+    font-size: 2rem;
+    color: #2563eb;
+  }
+
+  .sample-text h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+
+  .sample-text p {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #2563eb;
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color 0.2s;
+  }
+
+  .btn-download:hover {
+    background: #1d4ed8;
+  }
+
+  /* Tech stack */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  @media (min-width: 640px) {
+    .tech-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  .tech-item {
+    text-align: center;
+  }
+
+  .tech-icon {
+    width: 5rem;
+    height: 5rem;
+    margin: 0 auto 0.75rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tech-icon i {
+    font-size: 2rem;
+  }
+
+  .tech-icon-blue {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .tech-icon-red {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .tech-icon-green {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .tech-icon-yellow {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  .tech-icon-purple {
+    background: #f3e8ff;
+    color: #9333ea;
+  }
+
+  .tech-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  /* FAQ */
+  .faq-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+
+  .faq-question {
+    width: 100%;
+    text-align: left;
+    padding: 1rem 1.5rem;
+    background: #f9fafb;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .faq-question:hover {
+    background: #f3f4f6;
+  }
+
+  .faq-question i {
+    transition: transform 0.2s;
+  }
+
+  .faq-answer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .faq-answer.show {
+    display: block;
+  }
+
+  .faq-answer pre {
+    background: #f3f4f6;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Contact */
+  .contact-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .contact-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .contact-subtitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+  }
+
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .contact-list li {
+    margin-bottom: 0.75rem;
+  }
+
+  .contact-list a {
+    display: flex;
+    align-items: center;
+    color: #2563eb;
+    text-decoration: none;
+  }
+
+  .contact-list a:hover {
+    text-decoration: underline;
+  }
+
+  .contact-list i {
+    width: 1.5rem;
+    text-align: center;
+    margin-right: 0.5rem;
+    color: #9ca3af;
+  }
+
+  .info-box {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    color: #1e40af;
+  }
+
+  .info-box i {
+    margin-right: 0.25rem;
+  }
+
+  /* Utility */
+  .text-center {
+    text-align: center;
+  }
+
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+
+  .mb-8 {
+    margin-bottom: 2rem;
+  }
+
+  .mb-12 {
+    margin-bottom: 3rem;
+  }
+
+  .mt-2 {
+    margin-top: 0.5rem;
+  }
+
+  .mt-4 {
+    margin-top: 1rem;
+  }
+
+  .mt-6 {
+    margin-top: 1.5rem;
+  }
+
+  .mt-8 {
+    margin-top: 2rem;
+  }
+
+  .mr-1 {
+    margin-right: 0.25rem;
+  }
+
+  .mr-2 {
+    margin-right: 0.5rem;
+  }
+
+  .mr-3 {
+    margin-right: 0.75rem;
+  }
+
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .max-w-3xl {
+    max-width: 48rem;
+  }
+
+  .max-w-4xl {
+    max-width: 56rem;
+  }
+
+  .max-w-6xl {
+    max-width: 72rem;
+  }
+
+  .max-w-7xl {
+    max-width: 80rem;
+  }
+</style>
+
+<div class="about-container">
+  <!-- Hero -->
+  <div class="hero-card">
+    <div class="hero-icon">
+      <i class="fas fa-robot"></i>
+    </div>
+    <h1 class="hero-title">About AutoML v1.0</h1>
+    <p class="hero-subtitle">Traditional Machine Learning — Automated, Simplified, Powerful</p>
+    <div class="badge-group">
+      <span class="badge badge-blue"><i class="fas fa-tag mr-1"></i> v1.0.0</span>
+      <span class="badge badge-green"><i class="fas fa-check mr-1"></i> Traditional ML Only</span>
+      <span class="badge badge-purple"><i class="fas fa-flask mr-1"></i> Flask + Scikit-learn</span>
+    </div>
+  </div>
+
+  <!-- Mission -->
+  <div class="mission-card">
+    <p class="mission-text">
+      AutoML v1.0 is an end‑to‑end automated machine learning web platform built entirely from scratch using
+      Python and Flask. Upload a CSV file, let the platform handle data analysis, feature engineering,
+      model training, and performance comparison — all without writing a single line of ML code.
+    </p>
+  </div>
+
+  <!-- Features -->
+  <h2 class="section-title">Key Features</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon feature-icon-blue"><i class="fas fa-bolt"></i></div>
+      <h3 class="feature-title">Auto EDA + Feature Engineering</h3>
+      <p class="feature-desc">Automatic data cleaning, missing value handling, encoding, scaling, and outlier detection.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon feature-icon-green"><i class="fas fa-chart-line"></i></div>
+      <h3 class="feature-title">Multi‑Model Training</h3>
+      <p class="feature-desc">Train and compare regression, classification, and zero‑inflated models simultaneously.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon feature-icon-purple"><i class="fas fa-download"></i></div>
+      <h3 class="feature-title">Export Everything</h3>
+      <p class="feature-desc">Download best model as .pkl, processed dataset as .csv, and full analysis as .json report.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon feature-icon-yellow"><i class="fas fa-sliders-h"></i></div>
+      <h3 class="feature-title">Auto or Manual Mode</h3>
+      <p class="feature-desc">Choose fully automated pipelines or manually configure model selection and hyperparameter
+        tuning.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon feature-icon-red"><i class="fas fa-tachometer-alt"></i></div>
+      <h3 class="feature-title">Composite Scoring</h3>
+      <p class="feature-desc">Unique Zero‑Inflated composite score for datasets with many zero values — beyond standard
+        metrics.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon feature-icon-indigo"><i class="fas fa-eye"></i></div>
+      <h3 class="feature-title">Live Training Monitor</h3>
+      <p class="feature-desc">Real‑time progress tracking with model‑by‑model status updates while training runs in the
+        background.</p>
+    </div>
+  </div>
+
+  <!-- How It Works (Step by Step) -->
+  <h2 class="section-title">How It Works</h2>
+  <div class="timeline">
+    <div class="timeline-line"></div>
+    <!-- Step 1 -->
+    <div class="step-row">
+      <div class="step-left">
+        <div class="step-card">
+          <div class="step-number step-number-blue">1</div>
+          <h3 class="step-title">Upload Your CSV File</h3>
+          <p class="step-desc">Go to <strong>Upload Data</strong> and select any CSV file. Index columns and empty
+            columns are automatically removed.</p>
+        </div>
+      </div>
+      <div class="step-right"></div>
+    </div>
+    <!-- Step 2 -->
+    <div class="step-row">
+      <div class="step-left"></div>
+      <div class="step-right">
+        <div class="step-card">
+          <div class="step-number step-number-green">2</div>
+          <h3 class="step-title">Explore Your Data</h3>
+          <p class="step-desc">The <strong>Data Overview</strong> page shows statistics, column types, missing value
+            counts, and auto‑generated visualizations.</p>
+        </div>
+      </div>
+    </div>
+    <!-- Step 3 -->
+    <div class="step-row">
+      <div class="step-left">
+        <div class="step-card">
+          <div class="step-number step-number-purple">3</div>
+          <h3 class="step-title">Select Target Column</h3>
+          <p class="step-desc">Pick the column you want to predict. The platform auto‑detects regression,
+            classification, or zero‑inflated tasks.</p>
+        </div>
+      </div>
+      <div class="step-right"></div>
+    </div>
+    <!-- Step 4 -->
+    <div class="step-row">
+      <div class="step-left"></div>
+      <div class="step-right">
+        <div class="step-card">
+          <div class="step-number step-number-yellow">4</div>
+          <h3 class="step-title">Feature Engineering</h3>
+          <p class="step-desc">Click <strong>Start Processing</strong> to encode categoricals, scale numerics, handle
+            outliers, and prepare data for modeling.</p>
+        </div>
+      </div>
+    </div>
+    <!-- Step 5 -->
+    <div class="step-row">
+      <div class="step-left">
+        <div class="step-card">
+          <div class="step-number step-number-pink">5</div>
+          <h3 class="step-title">Feature Selection</h3>
+          <p class="step-desc">Choose the number of top features to keep, or use <em>Auto</em> mode to retain the most
+            predictive features.</p>
+        </div>
+      </div>
+      <div class="step-right"></div>
+    </div>
+    <!-- Step 6 -->
+    <div class="step-row">
+      <div class="step-left"></div>
+      <div class="step-right">
+        <div class="step-card">
+          <div class="step-number step-number-indigo">6</div>
+          <h3 class="step-title">Model Training</h3>
+          <p class="step-desc">Choose Auto/Manual mode, set hyperparameters, and start training. Real‑time progress is
+            displayed.</p>
+        </div>
+      </div>
+    </div>
+    <!-- Step 7 -->
+    <div class="step-row">
+      <div class="step-left">
+        <div class="step-card">
+          <div class="step-number step-number-teal">7</div>
+          <h3 class="step-title">Results & Downloads</h3>
+          <p class="step-desc">Compare models side‑by‑side, download the best model, processed CSV, and full JSON
+            report.</p>
+        </div>
+      </div>
+      <div class="step-right"></div>
+    </div>
+  </div>
+
+  <!-- Sample Dataset -->
+  <div class="sample-card">
+    <div class="sample-info">
+      <div class="sample-icon"><i class="fas fa-file-csv"></i></div>
+      <div class="sample-text">
+        <h3>Sample Dataset</h3>
+        <p>Income Classification · 20 rows · 7 columns · CSV</p>
+      </div>
+    </div>
+    <a href="/static/sample_dataset.csv" download="automl_sample_dataset.csv" class="btn-download">
+      <i class="fas fa-download"></i> Download Sample
+    </a>
+  </div>
+
+  <!-- Technology Stack -->
+  <h2 class="section-title">Technology Stack</h2>
+  <div class="tech-grid">
+    <div class="tech-item">
+      <div class="tech-icon tech-icon-blue"><i class="fab fa-python"></i></div>
+      <div class="tech-name">Python</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon tech-icon-red"><i class="fas fa-fire"></i></div>
+      <div class="tech-name">Flask</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon tech-icon-green"><i class="fas fa-chart-bar"></i></div>
+      <div class="tech-name">Scikit‑learn</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon tech-icon-yellow"><i class="fab fa-js-square"></i></div>
+      <div class="tech-name">JavaScript</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon tech-icon-purple"><i class="fab fa-html5"></i></div>
+      <div class="tech-name">HTML / CSS</div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <h2 class="section-title">Frequently Asked Questions</h2>
+  <div id="faqAccordion">
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>What file formats are supported?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        Currently AutoML v1.0 supports only <strong>CSV files</strong>. The platform auto‑detects separators (comma,
+        semicolon, tab, pipe). Make sure your file is saved in UTF‑8 encoding for best results.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>What is zero‑inflated modeling?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        Zero‑inflated modeling is a two‑stage approach for target columns with a large number of zero values. Stage 1 is
+        a classifier that predicts whether the value will be zero or non‑zero. Stage 2 is a regressor that predicts the
+        actual non‑zero value. AutoML detects this automatically when your target column has &gt;30% zeros.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>Why does training take a long time?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        Training time depends on dataset size, number of models selected, and tuning mode. Auto tuning
+        (RandomizedSearchCV) with many models on large datasets can take several minutes. For faster results, use Manual
+        mode and select 2–3 models with Manual tuning. The progress bar updates in real time.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>How do I use the downloaded .pkl model file?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        The .pkl file is a serialized scikit‑learn pipeline. Load it in Python using:
+        <pre>import joblib
+model = joblib.load('your_model.pkl')
+predictions = model.predict(your_dataframe)</pre>
+        Make sure to use the processed CSV (not the original) as input, with the same column structure.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>Does AutoML support deep learning?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        Not in v1.0. This version focuses exclusively on traditional machine learning models from scikit‑learn. Deep
+        learning (ANN/CNN/RNN) support is planned for a future version.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>What happens if I navigate away during training?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        Training runs in a background thread on the server, so it continues even if you navigate away. However, we
+        recommend staying on the training page to monitor progress. If you go back and reload the page, the status will
+        reflect the current training state without restarting it.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>What is the JSON report and what does it contain?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        The JSON report is a comprehensive summary of your entire AutoML session. It includes dataset information,
+        feature engineering steps applied, all model scores and metrics, the best model details, and timestamps. It's
+        useful for documentation and reproducing results.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)">
+        <span>My dataset has missing values. Will AutoML handle them?</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="faq-answer">
+        Yes. Enable <strong>Auto Clean</strong> on the Target Selection page to automatically fill missing values:
+        numeric columns use median imputation, categorical columns use mode imputation. Rows where the target column
+        itself is missing are always removed.
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact & Support -->
+  <div class="contact-card">
+    <h2 class="section-title" style="margin-top: 0;">Contact & Support</h2>
+    <div class="contact-grid">
+      <div>
+        <h3 class="contact-subtitle">Resources</h3>
+        <ul class="contact-list">
+          <li><a href="#"
+              onclick="document.getElementById('faqAccordion').scrollIntoView({behavior:'smooth'}); return false;"><i
+                class="fas fa-question-circle"></i> FAQ (above)</a></li>
+          <li><a href="https://github.com/Palakdeep-Singh/Auto-ML" target="_blank"><i class="fab fa-github"></i> GitHub
+              Repository</a></li>
+          <li><a href="/static/sample_dataset.csv" download="automl_sample_dataset.csv"><i class="fas fa-file-csv"></i>
+              Download Sample Dataset</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="contact-subtitle">Get in Touch</h3>
+        <ul class="contact-list">
+          <li><a href="mailto:palakdeep8055@gmail.com"><i class="fas fa-envelope"></i> palakdeep8055@gmail.com</a></li>
+          <li><a href="https://github.com/Palakdeep-Singh/Auto-ML" target="_blank"><i class="fab fa-github"></i>
+              github.com/Palakdeep-Singh/Auto-ML</a></li>
+        </ul>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          This is AutoML <strong>v1.0</strong> — an initial release focused on traditional ML. Deep learning support is
+          planned for v2.0. Feature requests and bug reports are welcome via GitHub Issues.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const icon = btn.querySelector('i');
+    answer.classList.toggle('show');
+    icon.style.transform = answer.classList.contains('show') ? 'rotate(180deg)' : '';
+  }
+</script>
+{% endblock %}

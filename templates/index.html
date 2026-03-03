@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}AutoML v1.0 · Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block head %}
+<style>
+.hero{background:linear-gradient(135deg,#1e40af 0%,#2563eb 45%,#059669 100%);border-radius:16px;padding:48px 44px;color:#fff;position:relative;overflow:hidden;margin-bottom:28px}
+.hero::before{content:'';position:absolute;top:-50px;right:-60px;width:280px;height:280px;background:rgba(255,255,255,.06);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-70px;right:60px;width:180px;height:180px;background:rgba(255,255,255,.04);border-radius:50%}
+.hero-c{position:relative;z-index:1}
+.hero h1{font-size:2.2rem;font-weight:800;margin-bottom:10px;line-height:1.2;letter-spacing:-.02em}
+.hero p{font-size:1rem;opacity:.88;max-width:560px;line-height:1.65;margin-bottom:26px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap}
+.hbtn-w{background:#fff;color:#2563eb;font-weight:700;padding:11px 24px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;text-decoration:none;transition:all .2s;font-size:.9rem;font-family:'DM Sans',sans-serif}
+.hbtn-w:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.hbtn-g{background:rgba(255,255,255,.14);color:#fff;border:1.5px solid rgba(255,255,255,.35);font-weight:600;padding:11px 24px;border-radius:9px;display:inline-flex;align-items:center;gap:7px;text-decoration:none;transition:all .2s;font-size:.9rem;font-family:'DM Sans',sans-serif;backdrop-filter:blur(4px)}
+.hbtn-g:hover{background:rgba(255,255,255,.24);transform:translateY(-2px)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:32px}
+.hs{background:rgba(255,255,255,.11);border-radius:10px;padding:14px 16px;border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(4px)}
+.hs-v{font-size:1.6rem;font-weight:800;font-family:'DM Mono',monospace}
+.hs-l{font-size:.73rem;opacity:.78;margin-top:3px}
+.step-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px;margin-bottom:28px}
+.step-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;transition:all .22s;text-decoration:none;display:block}
+.step-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--p)}
+.step-num{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;margin-bottom:12px}
+.step-title{font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:5px}
+.step-desc{font-size:.76rem;color:var(--text3);line-height:1.5}
+.step-go{margin-top:12px;font-size:.75rem;color:var(--p);font-weight:600;display:flex;align-items:center;gap:4px;opacity:0;transition:opacity .2s}
+.step-card:hover .step-go{opacity:1}
+.status-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:28px}
+.status-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.sdot-g{background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.18)}
+.sdot-b{background:var(--p);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+.sdot-n{background:#cbd5e1}
+</style>
+{% endblock %}
+{% block content %}
+<div class="hero">
+  <div class="hero-c">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+      <div style="background:rgba(255,255,255,.18);border-radius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.3rem">🤖</div>
+      <span style="background:rgba(255,255,255,.14);padding:4px 12px;border-radius:20px;font-size:.76rem;font-weight:600;border:1px solid rgba(255,255,255,.28)">AutoML v1.0 · Traditional ML</span>
+    </div>
+    <h1>Automated Machine Learning<br>From CSV to Model in Minutes</h1>
+    <p>Upload any CSV file. AutoML handles EDA, feature engineering, model training and comparison — zero ML code needed.</p>
+    <div class="hero-btns">
+      <a href="/upload" class="hbtn-w"><i class="fas fa-rocket"></i> Start Analysis</a>
+      <a href="/about"  class="hbtn-g"><i class="fas fa-book-open"></i> User Guide</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-v">10+</div><div class="hs-l">ML Models</div></div>
+      <div class="hs"><div class="hs-v">3</div><div class="hs-l">Task Types</div></div>
+      <div class="hs"><div class="hs-v">Auto</div><div class="hs-l">Tuning</div></div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-bottom:10px"><h2 style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:3px">ML Pipeline</h2><p style="font-size:.8rem;color:var(--text3)">Follow these 7 steps to build your model</p></div>
+<div class="step-grid">
+  {% set steps=[('/upload','1','#eff6ff','#2563eb','upload','Upload Data','Upload any CSV — auto-detects separators'),('/overview','2','#f0fdf4','#059669','table','Explore Data','Auto EDA with stats and charts'),('/target','3','#fef2f2','#dc2626','bullseye','Select Target','Auto-detects regression, classification, zero-inflated'),('/fe_auto','4','#fefce8','#d97706','cogs','Feature Eng.','Encoding, scaling, imputation, outlier handling'),('/feature_selection','5','#faf5ff','#7c3aed','filter','Select Features','Keep the most predictive features'),('/model_training','6','#eff6ff','#2563eb','brain','Train Models','Auto or manual model selection + tuning'),('/results','7','#f0fdf4','#059669','chart-line','Results','Compare models and download artifacts')] %}
+  {% for url,num,bg,col,icon,title,desc in steps %}
+  <a href="{{ url }}" class="step-card">
+    <div class="step-num" style="background:{{ bg }};color:{{ col }}">{{ num }}</div>
+    <div class="step-title">{{ title }}</div>
+    <div class="step-desc">{{ desc }}</div>
+    <div class="step-go"><i class="fas fa-arrow-right"></i> Go</div>
+  </a>
+  {% endfor %}
+</div>
+
+<div style="margin-bottom:10px"><h2 style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:3px">Session Status</h2><p style="font-size:.8rem;color:var(--text3)">Current pipeline progress</p></div>
+<div class="status-row">
+  <div class="status-item">
+    <div class="sdot {% if DATASTORE.get('original_df') is not none %}sdot-g{% else %}sdot-n{% endif %}"></div>
+    <div><div style="font-size:.84rem;font-weight:600">Dataset</div><div style="font-size:.74rem;color:var(--text3)">{% if DATASTORE.get('original_df') is not none %}{{ DATASTORE.get('original_df').shape[0] }} rows loaded{% else %}Not loaded{% endif %}</div></div>
+  </div>
+  <div class="status-item">
+    <div class="sdot {% if DATASTORE.get('X_processed') is not none %}sdot-g{% elif DATASTORE.get('original_df') is not none %}sdot-b{% else %}sdot-n{% endif %}"></div>
+    <div><div style="font-size:.84rem;font-weight:600">Processing</div><div style="font-size:.74rem;color:var(--text3)">{% if DATASTORE.get('X_processed') is not none %}Complete{% elif DATASTORE.get('original_df') is not none %}Ready{% else %}Waiting{% endif %}</div></div>
+  </div>
+  <div class="status-item">
+    <div class="sdot {% if TRAINING_STATUS.get('done') %}sdot-g{% elif TRAINING_STATUS.get('running') %}sdot-b{% else %}sdot-n{% endif %}"></div>
+    <div><div style="font-size:.84rem;font-weight:600">Training</div><div style="font-size:.74rem;color:var(--text3)">{% if TRAINING_STATUS.get('done') %}Complete{% elif TRAINING_STATUS.get('running') %}In progress{% else %}Not started{% endif %}</div></div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:0">
+  <div class="card-head"><h2 class="card-title"><i class="fas fa-brain"></i> Supported Models</h2><span class="badge b-pri">Traditional ML · v1.0</span></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px">
+    <div>
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:9px">Regression</div>
+      {% for m in ['Linear Regression','Ridge','Lasso','Random Forest','Gradient Boosting','XGBoost','SVR','KNN'] %}
+      <div style="display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--text2);margin-bottom:5px"><i class="fas fa-check-circle" style="color:var(--s);font-size:.72rem"></i> {{ m }}</div>
+      {% endfor %}
+    </div>
+    <div>
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:9px">Classification</div>
+      {% for m in ['Logistic Regression','Random Forest','Gradient Boosting','XGBoost','SVM','KNN'] %}
+      <div style="display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--text2);margin-bottom:5px"><i class="fas fa-check-circle" style="color:var(--p);font-size:.72rem"></i> {{ m }}</div>
+      {% endfor %}
+    </div>
+    <div>
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:9px">Zero-Inflated</div>
+      <div style="background:var(--bg);border-radius:9px;padding:14px;font-size:.82rem;color:var(--text2);line-height:1.65">
+        Two-stage pipeline:<br>
+        <span style="color:var(--p);font-weight:600">Stage 1</span> — Classifier for zero detection<br>
+        <span style="color:var(--s);font-weight:600">Stage 2</span> — Regressor for value prediction
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

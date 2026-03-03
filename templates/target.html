@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Select Target · AutoML v1.0{% endblock %}
+{% block page_title %}Target Selection{% endblock %}
+{% block head %}
+<style>
+.col-card{background:#fff;border:2px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;position:relative}
+.col-card:hover{border-color:var(--p);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.col-card.selected{border-color:var(--p);background:var(--pl)}
+.col-card input[type=radio]{position:absolute;top:14px;right:14px;accent-color:var(--p)}
+.type-guide{border:1px solid var(--border);border-radius:10px;padding:18px;transition:all .2s}
+.type-guide:hover{border-color:var(--p);box-shadow:var(--shadow)}
+select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--text);background:#fff;transition:border-color .2s}
+select:focus{outline:none;border-color:var(--p)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title"><i class="fas fa-bullseye"></i> Select Target Variable</h2>
+    <span class="badge b-pri"><i class="fas fa-database"></i> {{ dataset_size }} rows</span>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-danger"><i class="fas fa-exclamation-circle" style="flex-shrink:0"></i><span>{{ error }}</span></div>
+  {% endif %}
+
+  <form method="POST" action="/target">
+    <div style="margin-bottom:22px">
+      <h3 style="font-size:.9rem;font-weight:700;margin-bottom:4px">1. Choose Target Column</h3>
+      <p style="font-size:.82rem;color:var(--text3);margin-bottom:14px">Select the column you want to predict</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px">
+        {% for col in column_analysis %}
+        <label class="col-card {% if previous_target==col.name %}selected{% endif %}" id="cc_{{ loop.index }}">
+          <input type="radio" name="target" value="{{ col.name }}" {% if previous_target==col.name %}checked{% endif %} onchange="selectCard(this)">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding-right:22px">
+            <div style="width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;{% if col.type=='binary' %}background:var(--sl);{% elif 'numeric' in col.type %}background:var(--pl);{% elif 'categorical' in col.type %}background:#faf5ff;{% else %}background:var(--bg);{% endif %}">
+              <i class="fas fa-{% if col.type=='binary' %}check-double{% elif 'numeric' in col.type %}chart-line{% elif 'categorical' in col.type %}tags{% else %}columns{% endif %}" style="{% if col.type=='binary' %}color:#059669;{% elif 'numeric' in col.type %}color:var(--p);{% elif 'categorical' in col.type %}color:#7c3aed;{% else %}color:var(--text3);{% endif %}font-size:.9rem"></i>
+            </div>
+            <div style="flex:1;overflow:hidden">
+              <div style="font-weight:700;font-size:.87rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ col.name }}</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:4px;flex-wrap:wrap">
+                <span class="chip {% if col.type=='binary' %}chip-g{% elif 'numeric' in col.type %}chip-b{% else %}{% endif %}" style="font-size:.68rem">{{ col.type }}</span>
+                <span style="font-size:.72rem;color:var(--text3)">{{ col.unique }} unique</span>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:.78rem;color:var(--text2);display:flex;justify-content:space-between;margin-bottom:6px">
+            <span>Missing</span><span style="font-family:'DM Mono',monospace">{{ col.missing }}</span>
+          </div>
+          {% if col.is_zero_inflated and col.zero_percentage != '0%' %}
+          <div style="font-size:.78rem;color:var(--text2);display:flex;justify-content:space-between;margin-bottom:6px">
+            <span>Zero Ratio</span><span style="font-family:'DM Mono',monospace;color:#d97706">{{ col.zero_percentage }}</span>
+          </div>
+          {% endif %}
+          {% if col.suggested %}
+          <div style="margin-top:8px;padding:7px 10px;background:var(--pl);border-radius:7px;font-size:.75rem;color:var(--p)"><i class="fas fa-lightbulb" style="margin-right:5px"></i>{{ col.reason }}</div>
+          {% endif %}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border2);padding-top:20px;margin-bottom:22px">
+      <h3 style="font-size:.9rem;font-weight:700;margin-bottom:14px">2. Preprocessing Options</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:14px;border:1.5px solid var(--border);border-radius:10px;transition:border-color .2s" onmouseover="this.style.borderColor='var(--p)'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" name="auto_clean" id="ac" {% if auto_clean_default %}checked{% endif %} style="accent-color:var(--p);margin-top:2px;flex-shrink:0">
+            <div>
+              <div style="font-weight:600;font-size:.87rem">Auto-clean features</div>
+              <div style="font-size:.76rem;color:var(--text3);margin-top:3px">Impute missing values automatically (median for numeric, mode for categorical)</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="font-size:.82rem;font-weight:600;margin-bottom:6px;display:block">Feature Engineering Strategy</label>
+          <select name="feature_strategy">
+            <option value="auto">Auto (Recommended)</option>
+            <option value="minimal">Minimal Processing</option>
+            <option value="comprehensive">Comprehensive</option>
+          </select>
+          <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:5px">
+            {% for lbl,clr in [('Zero-Inflated','#faf5ff'),('Regression','var(--pl)'),('Classification','var(--sl)'),('Multi-class','#fefce8')] %}
+            <span style="padding:3px 9px;background:{{ clr }};border-radius:5px;font-size:.72rem;font-weight:500">{{ lbl }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border2);padding-top:16px">
+      <a href="/overview" class="btn btn-sec"><i class="fas fa-arrow-left"></i> Back</a>
+      <button type="submit" class="btn btn-pri btn-lg"><i class="fas fa-arrow-right"></i> Continue to Feature Engineering</button>
+    </div>
+  </form>
+</div>
+
+<div class="card" style="margin-bottom:0">
+  <div class="card-head"><h2 class="card-title"><i class="fas fa-question-circle"></i> Target Type Guide</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+    {% for icon,bg,col,title,sub,items in [
+      ('chart-line','var(--pl)','var(--p)','Regression','Predict continuous values',[('Numeric with many unique values'),('Price, temperature, age'),('Metrics: R², RMSE')]),
+      ('check-double','var(--sl)','#059669','Classification','Predict categories/classes',[('2–20 unique categories'),('Yes/No, types, labels'),('Metrics: Accuracy, F1')]),
+      ('percentage','#fef3c7','#d97706','Zero-Inflated','Mixed zero/non-zero data',[('30–95% zeros in data'),('Sales, claims, counts'),('Two-stage modeling')])
+    ] %}
+    <div class="type-guide">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:40px;height:40px;border-radius:10px;background:{{ bg }};display:flex;align-items:center;justify-content:center;"><i class="fas fa-{{ icon }}" style="color:{{ col }};font-size:1rem"></i></div>
+        <div><div style="font-weight:700;font-size:.9rem">{{ title }}</div><div style="font-size:.75rem;color:var(--text3)">{{ sub }}</div></div>
+      </div>
+      {% for item in items %}
+      <div style="display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--text2);margin-bottom:5px"><i class="fas fa-check" style="color:{{ col }};font-size:.72rem;flex-shrink:0"></i>{{ item }}</div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function selectCard(inp){
+  document.querySelectorAll('.col-card').forEach(c=>c.classList.remove('selected'));
+  inp.closest('.col-card').classList.add('selected');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const c=document.querySelector('input[name="target"]:checked');
+  if(c)c.closest('.col-card').classList.add('selected');
+});
+</script>
+{% endblock %}

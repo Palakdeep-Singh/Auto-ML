@@ -1,0 +1,670 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* ===== Feature Engineering Page Styles ===== */
+  .fe-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  }
+
+  /* Cards */
+  .fe-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .fe-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #111827;
+  }
+
+  .fe-card-body {
+    padding: 1.5rem;
+  }
+
+  /* Process Steps */
+  .steps-container {
+    margin: 2rem 0 3rem;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .step-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 1.5rem;
+  }
+
+  .step-icon i {
+    font-size: 1.5rem;
+  }
+
+  .step-blue {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+
+  .step-purple {
+    background: #f3e8ff;
+    color: #9333ea;
+  }
+
+  .step-green {
+    background: #d1fae5;
+    color: #059669;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-desc {
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .step-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .step-tag {
+    background: #f3f4f6;
+    padding: 0.25rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: #374151;
+  }
+
+  /* Vertical line */
+  .timeline-line {
+    position: absolute;
+    left: 2rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e5e7eb;
+    transform: translateX(-50%);
+  }
+
+  @media (min-width: 768px) {
+    .timeline-line {
+      left: 2rem;
+    }
+  }
+
+  /* Action buttons */
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background-color 0.2s;
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: white;
+    color: #374151;
+    border-color: #d1d5db;
+  }
+
+  .btn-secondary:hover {
+    background: #f9fafb;
+  }
+
+  /* Progress card */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .status-info {
+    background: #e8f0fe;
+    color: #1a73e8;
+  }
+
+  .status-success {
+    background: #e6f4ea;
+    color: #34a853;
+  }
+
+  .status-danger {
+    background: #fce8e6;
+    color: #ea4335;
+  }
+
+  .progress-container {
+    margin: 1rem 0;
+  }
+
+  .progress-bar {
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 0.25rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    width: 0%;
+    transition: width 0.5s;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .stat-card {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  /* Alert */
+  .alert-success {
+    background: #e6f4ea;
+    color: #137333;
+    border-left: 4px solid #34a853;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .info-box {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .info-title {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #374151;
+  }
+
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #4b5563;
+  }
+
+  .feature-list i {
+    color: #10b981;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .tag-blue {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .tag-green {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  /* Utilities */
+  .text-center {
+    text-align: center;
+  }
+
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+
+  .mb-6 {
+    margin-bottom: 1.5rem;
+  }
+
+  .mt-4 {
+    margin-top: 1rem;
+  }
+
+  .flex {
+    display: flex;
+  }
+
+  .justify-between {
+    justify-content: space-between;
+  }
+
+  .items-center {
+    align-items: center;
+  }
+
+  .gap-4 {
+    gap: 1rem;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .font-medium {
+    font-weight: 500;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .text-lg {
+    font-size: 1.125rem;
+  }
+
+  .text-gray-600 {
+    color: #6b7280;
+  }
+
+  .border-t {
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .pt-6 {
+    padding-top: 1.5rem;
+  }
+</style>
+
+<div class="fe-container">
+  <!-- Feature Engineering Card -->
+  <div class="fe-card">
+    <div class="fe-card-header">
+      <i class="fas fa-cogs mr-2"></i> Automated Feature Engineering
+    </div>
+  </div>
+
+  <!-- Process Steps -->
+  <div class="steps-container">
+    <h3 class="text-lg font-semibold mb-6">Feature Engineering Pipeline</h3>
+    <div class="relative">
+      <!-- Vertical line -->
+      <div class="timeline-line"></div>
+
+      <!-- Step 1 -->
+      <div class="step-item">
+        <div class="step-icon step-blue">
+          <i class="fas fa-broom"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Data Cleaning</h4>
+          <p class="step-desc">Remove missing values, handle outliers, normalize data formats</p>
+          <div class="step-tags">
+            <span class="step-tag">Missing value imputation</span>
+            <span class="step-tag">Outlier detection</span>
+            <span class="step-tag">Data normalization</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item">
+        <div class="step-icon step-purple">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Feature Extraction</h4>
+          <p class="step-desc">Extract features from datetime columns, text fields, and create interactions</p>
+          <div class="step-tags">
+            <span class="step-tag">Datetime features</span>
+            <span class="step-tag">Text processing</span>
+            <span class="step-tag">Feature interactions</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-item">
+        <div class="step-icon step-green">
+          <i class="fas fa-code"></i>
+        </div>
+        <div class="step-content">
+          <h4 class="step-title">Encoding & Transformation</h4>
+          <p class="step-desc">Convert categorical variables, handle high‑cardinality features, apply scaling</p>
+          <div class="step-tags">
+            <span class="step-tag">One‑hot encoding</span>
+            <span class="step-tag">Frequency encoding</span>
+            <span class="step-tag">Standard scaling</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-bar">
+    <a href="/target" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Back to Target Selection
+    </a>
+    <div class="flex gap-4">
+      <button id="startBtn" onclick="startFeatureEngineering()" class="btn btn-primary" {% if not has_data %}disabled{%
+        endif %}>
+        <i class="fas fa-play"></i> Start Feature Engineering
+      </button>
+      <a href="/feature_selection" class="btn btn-secondary" id="continueBtn" style="display: none;">
+        Continue to Feature Selection <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Progress Monitor -->
+  <div class="fe-card" id="progressCard" style="display: none;">
+    <div class="fe-card-header flex justify-between items-center">
+      <span><i class="fas fa-spinner fa-spin"></i> Feature Engineering Progress</span>
+      <span class="status-badge status-info" id="progressStatus">Starting...</span>
+    </div>
+    <div class="fe-card-body">
+      <div class="progress-container">
+        <div class="flex justify-between mb-2">
+          <span class="font-medium" id="progressMessage">Initializing...</span>
+          <span class="font-semibold" id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+      </div>
+      <!-- Progress details will be dynamically inserted here -->
+      <div id="progressDetails"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // (JavaScript unchanged – same as your original)
+  let progressInterval;
+
+  function startFeatureEngineering() {
+    const startBtn = document.getElementById('startBtn');
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    document.getElementById('progressCard').style.display = 'block';
+
+    fetch('/fe_auto/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'started') {
+          startProgressPolling();
+        } else {
+          alert('Failed to start: ' + (data.message || 'Unknown error'));
+          resetUI();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to start feature engineering');
+        resetUI();
+      });
+  }
+
+  function startProgressPolling() {
+    progressInterval = setInterval(updateProgress, 1000);
+  }
+
+  function updateProgress() {
+    fetch('/api/processing_status')
+      .then(response => response.json())
+      .then(data => {
+        updateProgressUI(data);
+        if (data.done) {
+          clearInterval(progressInterval);
+          if (data.stage === 'complete') {
+            document.getElementById('progressStatus').className = 'status-badge status-success';
+            document.getElementById('progressStatus').innerHTML = '<i class="fas fa-check-circle"></i> Complete';
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('continueBtn').style.display = 'inline-flex';
+
+            fetch('/api/fe_summary')
+              .then(response => response.json())
+              .then(summary => {
+                if (summary.ready) {
+                  showFESummary(summary);
+                } else {
+                  console.warn('Summary not ready yet');
+                }
+              });
+          } else if (data.stage === 'error') {
+            document.getElementById('progressStatus').className = 'status-badge status-danger';
+            document.getElementById('progressStatus').innerHTML = '<i class="fas fa-exclamation-circle"></i> Error';
+            alert('Feature engineering failed: ' + (data.error || 'Unknown error'));
+            resetUI();
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error polling progress:', error);
+      });
+  }
+
+  function updateProgressUI(data) {
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressMessage = document.getElementById('progressMessage');
+    const progressStatus = document.getElementById('progressStatus');
+
+    progressBar.style.width = (data.progress || 0) + '%';
+    progressPercent.textContent = (data.progress || 0) + '%';
+    progressMessage.textContent = data.message || data.operation || 'Processing...';
+
+    let statusClass = 'status-info';
+    let statusIcon = 'fas fa-spinner fa-spin';
+    let statusText = 'Processing';
+
+    if (data.stage === 'complete') {
+      statusClass = 'status-success';
+      statusIcon = 'fas fa-check-circle';
+      statusText = 'Complete';
+    } else if (data.stage === 'error') {
+      statusClass = 'status-danger';
+      statusIcon = 'fas fa-exclamation-circle';
+      statusText = 'Error';
+    }
+
+    progressStatus.className = `status-badge ${statusClass}`;
+    progressStatus.innerHTML = `<i class="${statusIcon}"></i> ${statusText}`;
+  }
+
+  function showFESummary(summary) {
+    const detailsDiv = document.getElementById('progressDetails');
+
+    const featuresBefore = summary.features_before ?? '?';
+    const featuresAfter = summary.features_after ?? '?';
+    const rowsBefore = summary.rows_before ?? 0;
+    const rowsDropped = summary.rows_dropped ?? 0;
+    const finalSamples = rowsBefore - rowsDropped;
+
+    const numericImp = summary.numeric_imputation || 'Numeric imputation applied';
+    const catImp = summary.categorical_imputation || 'Categorical imputation applied';
+    const oneHot = summary.one_hot_encoding || 'One‑hot encoding applied';
+    const freqEnc = summary.frequency_encoding || 'Frequency encoding applied';
+    const finalFeatures = summary.final_features_count || featuresAfter;
+
+    let html = `
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">${featuresBefore}</div>
+          <div class="stat-label">Original Features</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${featuresAfter}</div>
+          <div class="stat-label">Processed Features</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${finalSamples}</div>
+          <div class="stat-label">Final Samples</div>
+        </div>
+      </div>
+      <div class="alert-success mb-4">
+        <i class="fas fa-check-circle"></i>
+        Feature engineering completed successfully!<br>
+        <strong>${featuresBefore} → ${featuresAfter}</strong> features after processing.
+      </div>
+      <div class="two-col">
+        <div class="info-box">
+          <div class="info-title">Applied Transformations:</div>
+          <ul class="feature-list">
+            <li><i class="fas fa-check"></i> ${numericImp}</li>
+            <li><i class="fas fa-check"></i> ${catImp}</li>
+            <li><i class="fas fa-check"></i> ${oneHot}</li>
+            <li><i class="fas fa-check"></i> ${freqEnc}</li>
+          </ul>
+        </div>
+        <div class="info-box">
+          <div class="info-title">Feature Types:</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag tag-blue">Numeric: ${finalFeatures}</span>
+            <span class="tag tag-green">Encoded: ${freqEnc.includes('Applied') ? 'Yes' : 'No'}</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    detailsDiv.innerHTML = html;
+  }
+
+  function resetUI() {
+    const startBtn = document.getElementById('startBtn');
+    startBtn.disabled = false;
+    startBtn.innerHTML = '<i class="fas fa-play"></i> Start Feature Engineering';
+    document.getElementById('progressCard').style.display = 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/api/fe_progress')
+      .then(response => response.json())
+      .then(data => {
+        if (data.is_complete) {
+          document.getElementById('startBtn').style.display = 'none';
+          document.getElementById('continueBtn').style.display = 'inline-flex';
+
+          fetch('/api/fe_summary')
+            .then(response => response.json())
+            .then(summary => {
+              if (summary.ready) {
+                document.getElementById('progressCard').style.display = 'block';
+                showFESummary(summary);
+                document.getElementById('progressStatus').className = 'status-badge status-success';
+                document.getElementById('progressStatus').innerHTML = '<i class="fas fa-check-circle"></i> Complete';
+              }
+            });
+        }
+      });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Secrets
+.env
+*.key
+secret_key.txt
+
+# Flask
+instance/
+
+# Internal dev tools (not needed by contributors)
+split.py
+split_ast.py
+split_lines.py
+
+# ML artifacts (too large for git, use GitHub Releases instead)
+*.pkl
+*.joblib
+*.h5
+saved_models/
+uploads/
+
+# Database
+*.db
+*.sqlite
+
+# Backups
+*_backup.py
+*_old.py
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Analysis Report</h1>
+        <p class="text-gray-600 mt-2">Complete summary of your machine learning analysis</p>
+        <p class="text-sm text-gray-500 mt-1">
+          Generated on {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+        </p>
+      </div>
+      <div class="flex space-x-3">
+        <a href="/download_report" class="btn btn-success">
+          <i class="fas fa-file-pdf mr-2"></i>
+          Download PDF Report
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+          <i class="fas fa-print mr-2"></i>
+          Print Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="card mb-8">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fas fa-chart-line"></i>
+        Executive Summary
+      </h2>
+    </div>
+
+    <div class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-4 bg-blue-50 rounded-lg">
+          <div class="text-2xl font-bold text-blue-600 mb-1">
+            {{ report.best_model.name if report.best_model else 'N/A' }}
+          </div>
+          <div class="text-sm text-gray-600">Best Performing Model</div>
+        </div>
+
+        <div class="p-4 bg-green-50 rounded-lg">
+          <div class="text-2xl font-bold text-green-600 mb-1">
+            {% if report.best_model and report.best_model.metrics %}
+            {% if report.target_info.task_type == 'regression' %}
+            {{ "%.4f"|format(report.best_model.metrics.r2) }}
+            {% else %}
+            {{ "%.4f"|format(report.best_model.metrics.accuracy) }}
+            {% endif %}
+            {% else %}
+            N/A
+            {% endif %}
+          </div>
+          <div class="text-sm text-gray-600">Best Performance Score</div>
+        </div>
+
+        <div class="p-4 bg-purple-50 rounded-lg">
+          <div class="text-2xl font-bold text-purple-600 mb-1">
+            {{ report.model_results.training_time|default('N/A') }}
+          </div>
+          <div class="text-sm text-gray-600">Total Training Time (s)</div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-gray-50 rounded-lg">
+        <h4 class="font-medium text-gray-700 mb-2">Key Findings</h4>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+            {{ report.model_results.test_metrics|length }} models were successfully trained and evaluated
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+            Cross-validation was used to ensure model stability
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+            Feature selection reduced dimensionality to {{ report.feature_engineering.selected_features|length }}
+            features
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dataset Information -->
+  <div class="card mb-8">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fas fa-database"></i>
+        Dataset Information
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h4 class="font-medium text-gray-700 mb-4">Dataset Statistics</h4>
+        <div class="space-y-3">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Original Dataset Size</span>
+            <span class="font-medium">
+              {{ report.dataset_info.original_shape[0]|default('N/A') }} rows ×
+              {{ report.dataset_info.original_shape[1]|default('N/A') }} columns
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Processed Dataset Size</span>
+            <span class="font-medium">
+              {{ report.dataset_info.processed_shape[0]|default('N/A') }} rows ×
+              {{ report.dataset_info.processed_shape[1]|default('N/A') }} columns
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Target Column</span>
+            <span class="font-medium">{{ report.target_info.column|default('N/A') }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Problem Type</span>
+            <span class="font-medium">{{ report.target_info.task_type|default('N/A')|title }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-medium text-gray-700 mb-4">Processing Summary</h4>
+        <div class="space-y-2">
+          <div class="flex items-center">
+            <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            <span class="text-sm">Feature engineering completed</span>
+          </div>
+          <div class="flex items-center">
+            <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            <span class="text-sm">Missing values handled</span>
+          </div>
+          <div class="flex items-center">
+            <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            <span class="text-sm">Categorical encoding applied</span>
+          </div>
+          <div class="flex items-center">
+            <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            <span class="text-sm">Feature scaling performed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature Engineering Summary -->
+  <div class="card mb-8">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fas fa-cogs"></i>
+        Feature Engineering Summary
+      </h2>
+    </div>
+
+    <div class="space-y-6">
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">Feature Selection</h4>
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-blue-50 rounded-lg">
+            <div class="text-lg font-bold text-blue-600">
+              {{ report.feature_engineering.selected_features|length }}
+            </div>
+            <div class="text-xs text-gray-600">Features Selected</div>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm text-gray-600 mb-1">
+              Method: {{ report.feature_engineering.selection_method|default('Automatic Selection') }}
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill"
+                style="width: {{ (report.feature_engineering.selected_features|length / report.dataset_info.processed_shape[1] * 100)|default(0)|int }}%">
+              </div>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+              {{ ((report.feature_engineering.selected_features|length / report.dataset_info.processed_shape[1]) *
+              100)|default(0)|round(1) }}%
+              of original features retained
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if report.feature_engineering.selected_features %}
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">Selected Features (Top 15)</h4>
+        <div class="flex flex-wrap gap-2">
+          {% for feature in report.feature_engineering.selected_features[:15] %}
+          <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+            {{ feature[:20] }}{% if feature|length > 20 %}...{% endif %}
+          </span>
+          {% endfor %}
+          {% if report.feature_engineering.selected_features|length > 15 %}
+          <span class="px-3 py-1 bg-gray-200 text-gray-600 text-sm rounded-full">
+            +{{ report.feature_engineering.selected_features|length - 15 }} more
+          </span>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Model Performance -->
+  <div class="card mb-8">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Model Performance
+      </h2>
+    </div>
+
+    {% if report.model_results.test_metrics %}
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Model</th>
+            <th>Performance Score</th>
+            <th>Training Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for model_key, model_info in report.model_results.test_metrics.items()|sort(attribute='1.metrics.accuracy'
+          if report.target_info.task_type != 'regression' else '1.metrics.r2', reverse=True) %}
+          <tr class="{{ 'bg-yellow-50' if model_key == report.best_model.key }}">
+            <td>
+              <span
+                class="px-2 py-1 text-xs rounded {{ 'bg-yellow-100 text-yellow-800' if loop.index == 1 else 'bg-blue-100 text-blue-800' }}">
+                #{{ loop.index }}
+              </span>
+            </td>
+            <td class="font-medium">{{ model_info.label }}</td>
+            <td>
+              <span class="{{ 'font-bold text-green-600' if loop.index == 1 }}">
+                {% if report.target_info.task_type == 'regression' %}
+                R²: {{ "%.4f"|format(model_info.metrics.r2) }}
+                {% else %}
+                Accuracy: {{ "%.4f"|format(model_info.metrics.accuracy) }}
+                {% endif %}
+              </span>
+            </td>
+            <td>{{ "%.1f"|format(model_info.training_time) }}s</td>
+            <td>
+              <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">
+                Completed
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-8">
+      <p class="text-gray-500">No model performance data available</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Recommendations -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fas fa-lightbulb"></i>
+        Recommendations & Next Steps
+      </h2>
+    </div>
+
+    <div class="space-y-6">
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">Model Recommendations</h4>
+        <div class="p-4 bg-blue-50 rounded-lg">
+          <div class="flex items-start">
+            <i class="fas fa-star text-yellow-500 mt-1 mr-3"></i>
+            <div>
+              <p class="font-medium text-gray-900">Use {{ report.best_model.name|default('the best performing model') }}
+                for predictions</p>
+              <p class="text-sm text-gray-600 mt-1">
+                This model showed the best performance on the test set with
+                {% if report.best_model.metrics %}
+                {% if report.target_info.task_type == 'regression' %}
+                an R² score of {{ "%.4f"|format(report.best_model.metrics.r2) }}
+                {% else %}
+                an accuracy of {{ "%.4f"|format(report.best_model.metrics.accuracy) }}
+                {% endif %}
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h4 class="font-medium text-gray-700 mb-3">Improvement Suggestions</h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-start">
+              <i class="fas fa-plus-circle text-green-500 mt-1 mr-2"></i>
+              Collect more training data to improve model robustness
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-plus-circle text-green-500 mt-1 mr-2"></i>
+              Experiment with different feature engineering techniques
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-plus-circle text-green-500 mt-1 mr-2"></i>
+              Try ensemble methods combining top performing models
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-medium text-gray-700 mb-3">Production Considerations</h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-blue-500 mt-1 mr-2"></i>
+              Monitor model performance over time with new data
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-blue-500 mt-1 mr-2"></i>
+              Implement retraining pipeline for model updates
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-blue-500 mt-1 mr-2"></i>
+              Set up proper validation and testing procedures
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
+    <p>Report generated by AutoML v1.0 on {{ now().strftime('%Y-%m-%d at %H:%M:%S') }}</p>
+    <p class="mt-1">This is an automated machine learning analysis report.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Print-friendly styles
+  const printStyles = `
+    @media print {
+        .header, .sidebar, .btn, .header-actions {
+            display: none !important;
+        }
+        .main-content {
+            margin-left: 0 !important;
+            padding-top: 0 !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            break-inside: avoid;
+        }
+    }
+`;
+
+  // Add print styles
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = printStyles;
+  document.head.appendChild(styleSheet);
+</script>
+{% endblock %}

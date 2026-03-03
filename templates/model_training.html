@@ -1,0 +1,3499 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* ===============================
+     CLEAN PROFESSIONAL STYLES
+  ================================ */
+  :root {
+    --border-color: #dadce0;
+    --card-bg: #ffffff;
+    --hover-bg: #f8f9fa;
+    --active-color: #1a73e8;
+  }
+
+  .config-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    margin-bottom: 16px;
+  }
+
+  .config-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: #f8f9fa;
+    font-weight: 500;
+    font-size: 14px;
+    color: #3c4043;
+  }
+
+  .config-body {
+    padding: 20px;
+  }
+
+  /* Model Category Tabs */
+  .model-category-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+
+  .model-category-tab {
+    padding: 12px 20px;
+    font-size: 13px;
+    color: #5f6368;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .model-category-tab:hover {
+    color: var(--active-color);
+    background: #f8f9fa;
+  }
+
+  .model-category-tab.active {
+    color: var(--active-color);
+    border-bottom-color: var(--active-color);
+    font-weight: 500;
+  }
+
+  .model-category-content {
+    display: none;
+  }
+
+  .model-category-content.active {
+    display: block;
+  }
+
+  /* Model Selection Grid */
+  .model-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .model-selection-card {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 16px;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .model-selection-card:hover {
+    border-color: var(--active-color);
+    background: #f8f9fa;
+  }
+
+  .model-selection-card.selected {
+    border-color: var(--active-color);
+    border-width: 2px;
+    background: #e8f0fe;
+  }
+
+  .model-selection-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background: #f1f3f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+
+  .model-selection-icon.linear {
+    color: #1a73e8;
+    background: #e8f0fe;
+  }
+
+  .model-selection-icon.ensemble {
+    color: #fbbc04;
+    background: #fef7e0;
+  }
+
+  .model-selection-icon.svm {
+    color: #ea4335;
+    background: #fce8e6;
+  }
+
+  .model-selection-icon.knn {
+    color: #673ab7;
+    background: #f3e8fd;
+  }
+
+  .model-selection-icon.tree {
+    color: #34a853;
+    background: #e6f4ea;
+  }
+
+  .model-selection-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: #202124;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .model-selection-type {
+    font-size: 11px;
+    color: #5f6368;
+    margin-bottom: 8px;
+  }
+
+  /* Parameter Categories Tabs */
+  .param-category-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+
+  .param-category-tab {
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #5f6368;
+    cursor: pointer;
+    border-right: 1px solid var(--border-color);
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .param-category-tab:hover {
+    background: #f1f3f4;
+  }
+
+  .param-category-tab.active {
+    background: white;
+    color: var(--active-color);
+    font-weight: 500;
+    border-bottom: 2px solid var(--active-color);
+  }
+
+  .param-category-content {
+    display: none;
+  }
+
+  .param-category-content.active {
+    display: block;
+  }
+
+  .param-category-empty {
+    color: #5f6368;
+    font-size: 13px;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  /* Parameter Cards by Category */
+  .param-cards-category {
+    margin-bottom: 30px;
+  }
+
+  .param-category-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3c4043;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* FIXED: Parameter Cards Grid Layout */
+  .param-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  @media (max-width: 1400px) {
+    .param-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .param-cards-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* FIXED: Parameter Card Layout */
+  .param-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 300px;
+    max-height: 600px;
+  }
+
+  .param-card-header {
+    padding: 16px;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 500;
+    font-size: 13px;
+    color: #3c4043;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .param-card-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: 500px;
+  }
+
+  .param-card-body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .param-card-body::-webkit-scrollbar-track {
+    background: #f1f3f4;
+  }
+
+  .param-card-body::-webkit-scrollbar-thumb {
+    background: #dadce0;
+    border-radius: 3px;
+  }
+
+  .param-card-body::-webkit-scrollbar-thumb:hover {
+    background: #bdc1c6;
+  }
+
+  /* Parameter Container */
+  .param-container {
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* FIXED: Expandable Sections */
+  .expandable-section {
+    margin-bottom: 15px;
+    flex-shrink: 0;
+  }
+
+  .expandable-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .expandable-header:hover {
+    background: #f1f3f4;
+  }
+
+  .expandable-header i {
+    transition: transform 0.3s ease;
+    margin-right: 8px;
+  }
+
+  .expandable-header.active i {
+    transform: rotate(90deg);
+  }
+
+  .expandable-content {
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    display: none;
+    background: white;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .expandable-content.expanded {
+    display: block;
+  }
+
+  .expandable-content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .expandable-content::-webkit-scrollbar-track {
+    background: #f8f9fa;
+  }
+
+  .expandable-content::-webkit-scrollbar-thumb {
+    background: #dadce0;
+    border-radius: 2px;
+  }
+
+  /* FIXED: Compact Parameter Grid */
+  .compact-param-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .compact-param-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .compact-param-control {
+    margin-bottom: 15px;
+    break-inside: avoid;
+  }
+
+  .compact-param-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #3c4043;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .compact-param-label small {
+    display: block;
+    color: #80868b;
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 1.3;
+  }
+
+  /* Parameter Controls */
+  .param-control {
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  .param-group {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .param-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .param-group-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3c4043;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .param-label {
+    display: block;
+    font-size: 13px;
+    color: #3c4043;
+    margin-bottom: 8px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .param-label small {
+    color: #80868b;
+    font-weight: normal;
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+  }
+
+  .param-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .param-slider {
+    flex: 1;
+    height: 4px;
+    background: #dadce0;
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .param-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--active-color);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .param-value {
+    display: inline-block;
+    font-size: 13px;
+    color: var(--active-color);
+    font-weight: 500;
+    min-width: 60px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: white;
+    text-align: center;
+  }
+
+  .select-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 13px;
+    color: #202124;
+    background: white;
+    cursor: pointer;
+  }
+
+  .select-control:focus {
+    border-color: var(--active-color);
+    outline: none;
+    box-shadow: 0 0 0 2px #e8f0fe;
+  }
+
+  .checkbox-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .checkbox-control input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .checkbox-control label {
+    font-size: 13px;
+    color: #3c4043;
+    cursor: pointer;
+  }
+
+  /* Number input with slider */
+  .number-slider-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .number-slider-control .param-slider {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .number-slider-control input[type="number"] {
+    width: 80px;
+    min-width: 80px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .number-slider-control input[type="number"]:focus {
+    border-color: var(--active-color);
+    outline: none;
+    box-shadow: 0 0 0 2px #e8f0fe;
+  }
+
+  /* Radio button styling */
+  .radio-group {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .radio-option input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .radio-option span {
+    font-size: 13px;
+    color: #3c4043;
+  }
+
+  .radio-option.disabled span {
+    color: #999;
+  }
+
+  /* Multi-select styling */
+  .multi-select-control {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .multi-select-option {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .multi-select-option.selected {
+    background: var(--active-color);
+    color: white;
+    border-color: var(--active-color);
+  }
+
+  .multi-select-option input[type="checkbox"] {
+    margin: 0;
+  }
+
+  /* Text input styling */
+  .text-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 13px;
+    color: #202124;
+    background: white;
+  }
+
+  .text-control:focus {
+    border-color: var(--active-color);
+    outline: none;
+    box-shadow: 0 0 0 2px #e8f0fe;
+  }
+
+  /* Range input styling */
+  .range-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .range-control .param-slider {
+    flex: 1;
+  }
+
+  .range-control input[type="text"] {
+    width: 100px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* Reset button for parameters */
+  .reset-param-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    background: #f1f3f4;
+    border: 1px solid #dadce0;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+
+  .reset-param-btn:hover {
+    background: #e8f0fe;
+    border-color: #1a73e8;
+  }
+
+  /* Quick actions */
+  .quick-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .quick-action-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    background: #f8f9fa;
+    border: 1px solid #dadce0;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .quick-action-btn:hover {
+    background: #e8f0fe;
+    border-color: #1a73e8;
+  }
+
+  /* Utility */
+  .mb-3 {
+    margin-bottom: 16px;
+  }
+
+  .mt-3 {
+    margin-top: 16px;
+  }
+
+  .flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Main tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    padding: 12px 24px;
+    font-size: 14px;
+    color: #5f6368;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover {
+    color: var(--active-color);
+  }
+
+  .tab.active {
+    color: var(--active-color);
+    border-bottom-color: var(--active-color);
+    font-weight: 500;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Log Container */
+  .log-container {
+    height: 400px;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  .log-entry {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-left: 3px solid #dadce0;
+    border-radius: 2px;
+    font-size: 13px;
+  }
+
+  .log-entry.info {
+    border-left-color: #1a73e8;
+  }
+
+  .log-entry.warning {
+    border-left-color: #fbbc04;
+  }
+
+  .log-entry.success {
+    border-left-color: #34a853;
+  }
+
+  .log-entry.error {
+    border-left-color: #ea4335;
+  }
+
+  .log-time {
+    color: #5f6368;
+    margin-right: 12px;
+    font-size: 12px;
+  }
+
+  .log-message {
+    color: #202124;
+  }
+
+  /* Training Controls */
+  .training-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: var(--active-color);
+    color: white;
+    border-color: var(--active-color);
+  }
+
+  .btn-primary:hover {
+    background: #0d5cb6;
+    border-color: #0d5cb6;
+  }
+
+  .btn-primary:disabled {
+    background: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .btn-sec {
+    background: white;
+    color: #5f6368;
+    border-color: var(--border-color);
+  }
+
+  .btn-sec:hover {
+    background: #f8f9fa;
+    border-color: #c0c0c0;
+  }
+
+  .btn-sec:disabled {
+    background: #f5f5f5;
+    border-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+  }
+
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+  }
+
+  .btn-danger:hover {
+    background: #c82333;
+    border-color: #bd2130;
+  }
+
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .w-100 {
+    width: 100%;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .text-muted {
+    color: #5f6368;
+  }
+
+  .py-4 {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .py-5 {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  /* Model Status Indicators */
+  .model-type-indicator {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 8px;
+    text-transform: uppercase;
+  }
+
+  .model-type-regression {
+    background: #e8f0fe;
+    color: #1a73e8;
+  }
+
+  .model-type-classification {
+    background: #e6f4ea;
+    color: #34a853;
+  }
+
+  /* Training Progress Styles */
+  .progress-stage-container {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+
+  .stage-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .stage-1-badge {
+    background: #e6f4ea;
+    color: #34a853;
+    border: 1px solid #34a853;
+  }
+
+  .stage-2-badge {
+    background: #e8f0fe;
+    color: #1a73e8;
+    border: 1px solid #1a73e8;
+  }
+
+  .current-model-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e8f0fe 100%);
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .current-model-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #3b82f6, #10b981);
+    border-radius: 2px 0 0 2px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .status-text {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #3c4043;
+    margin-bottom: 8px;
+  }
+
+  .model-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 4px;
+  }
+
+  .model-info {
+    font-size: 13px;
+    color: #5f6368;
+    margin-bottom: 4px;
+  }
+
+  .models-count {
+    font-size: 12px;
+    color: #80868b;
+    margin-top: 8px;
+  }
+
+  /* Training Statistics */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .stat-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* Next Stage Info */
+  .next-stage-info {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #fbbc04;
+  }
+
+  /* Results Button */
+  .results-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    border: none;
+  }
+
+  .results-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    color: white;
+    text-decoration: none;
+  }
+
+  .results-button:active {
+    transform: translateY(0);
+  }
+
+  /* Additional Styles */
+  .flex-grow-1 {
+    flex-grow: 1;
+  }
+
+  .d-none {
+    display: none;
+  }
+
+  .mt-4 {
+    margin-top: 20px;
+  }
+
+  /* Zero-Inflation Specific Styles */
+  .zero-inflation-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 8px;
+  }
+
+  /* Parameter Category Colors */
+  .param-category-linear .param-category-title {
+    color: #1a73e8;
+    border-bottom-color: #1a73e8;
+  }
+
+  .param-category-tree .param-category-title {
+    color: #34a853;
+    border-bottom-color: #34a853;
+  }
+
+  .param-category-knn .param-category-title {
+    color: #673ab7;
+    border-bottom-color: #673ab7;
+  }
+
+  .param-category-svm .param-category-title {
+    color: #ea4335;
+    border-bottom-color: #ea4335;
+  }
+
+  .param-category-ensemble .param-category-title {
+    color: #fbbc04;
+    border-bottom-color: #fbbc04;
+  }
+
+  /* Progress Bar */
+  .progress-container {
+    margin-top: 15px;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #progressFill,
+  #progressPercent,
+  #progressBarContainer {
+    display: none !important;
+  }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+</style>
+
+<div class="container-fluid px-4 py-4">
+  <div class="row">
+    <!-- Left Configuration Panel -->
+    <div class="col-lg-3">
+      <div class="config-card mb-4">
+        <div class="config-header">Training Configuration</div>
+        <div class="config-body">
+          <!-- Model Selection Toggle -->
+          <div class="mb-3">
+            <div style="font-size: 13px; color: #3c4043; margin-bottom: 8px; font-weight: 500;">Model Selection</div>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="model_mode" value="auto" checked>
+                <span>Auto</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="model_mode" value="manual">
+                <span>Manual</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Parameter Tuning Toggle -->
+          <div class="mb-3">
+            <div style="font-size: 13px; color: #3c4043; margin-bottom: 8px; font-weight: 500;">Parameter Tuning</div>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="tuning_mode" value="auto" checked>
+                <span>Auto</span>
+              </label>
+              <label class="radio-option" id="manualTuningOption">
+                <input type="radio" name="tuning_mode" value="manual" disabled>
+                <span>Manual</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Manual Model Selection with Categories -->
+          <div id="modelSelection" style="display: none;">
+            <div style="font-size: 13px; color: #3c4043; margin-bottom: 8px; font-weight: 500;">Select Models</div>
+
+            <!-- Model Category Tabs -->
+            <div class="model-category-tabs" id="modelCategoryTabs"></div>
+
+            <!-- Model Selection Content -->
+            <div id="modelCategoryContent"></div>
+          </div>
+
+          <!-- Manual Parameter Tuning Sections -->
+          <div id="parameterSections" style="display: none; margin-top: 20px;">
+            <div style="font-size: 13px; color: #3c4043; margin-bottom: 8px; font-weight: 500;">Manual Parameter Tuning
+            </div>
+
+            <!-- Parameter Category Tabs -->
+            <div class="param-category-tabs" id="paramSectionTabs"></div>
+
+            <!-- Parameter Category Content -->
+            <div id="paramSectionContent"></div>
+          </div>
+
+          <!-- Task Info -->
+          <div class="mt-3" style="padding-top: 16px; border-top: 1px solid var(--border-color);">
+            <div class="flex-between mb-1">
+              <span style="font-size: 13px; color: #5f6368;">Task:</span>
+              <span style="font-size: 13px; font-weight: 500;" id="taskTypeDisplay">{{ task_type|replace('_', ' ')|title
+                }}</span>
+            </div>
+            <div class="flex-between mb-1">
+              <span style="font-size: 13px; color: #5f6368;">Features:</span>
+              <span style="font-size: 13px; font-weight: 500;">{{ n_features }}</span>
+            </div>
+            <div id="zeroInflationInfo"
+              style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+              <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">
+                <i class="fas fa-info-circle mr-1"></i> Zero-Inflated Task
+              </div>
+              <div style="font-size: 11px; color: #9ca3af;">
+                Requires 2-stage training: classification + regression
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Training Controls -->
+      <div class="config-card">
+        <div class="config-body">
+          <button id="startTrainingBtn" class="btn btn-primary w-100 mb-2">
+            <i class="fas fa-play"></i> Start Training
+          </button>
+          <div id="resetButtonContainer" style="display: none;">
+            <button id="resetTrainingBtn" class="btn btn-sec w-100">
+              <i class="fas fa-redo"></i> Reset Training
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-lg-9">
+      <!-- Main Tabs -->
+      <div class="tabs">
+        <div class="tab active" data-tab="progress">Training Progress</div>
+        <div class="tab" data-tab="models">Models</div>
+        <div class="tab" data-tab="logs">Logs</div>
+      </div>
+
+      <!-- Progress Tab -->
+      <div id="progressTab" class="tab-content active">
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-5">
+          <div class="mb-3" style="color: #dadce0;">
+            <i class="fas fa-cogs fa-4x"></i>
+          </div>
+          <h4 style="font-weight: 400; color: #3c4043; margin-bottom: 8px;">Ready to Train</h4>
+          <p style="color: #5f6368; font-size: 14px;">Configure settings and start training to begin</p>
+        </div>
+
+        <!-- Progress Container -->
+        <div id="progressContainer" style="display: none;">
+          <div class="config-card">
+            <div class="config-header">
+              <div class="flex-between">
+                <span>Training Progress</span>
+                <span id="trainingStatus" style="font-size: 12px; color: #5f6368;">Starting...</span>
+              </div>
+            </div>
+            <div class="config-body">
+              <!-- Simple Progress Bar -->
+              <div class="progress-container mb-4">
+                <div class="flex-between mb-2">
+                  <span style="font-size: 13px; color: #3c4043;">Overall Progress</span>
+                  <span id="progressPercent" style="font-size: 13px; font-weight: 500; color: #1a73e8;">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <!-- Current Model Card -->
+              <div class="current-model-card" style="
+          background: #f8f9fa;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+        ">
+                <div class="flex-between mb-3">
+                  <div style="font-size: 14px; font-weight: 500; color: #3c4043;">
+                    <i class="fas fa-cog mr-2"></i>
+                    Current Model
+                  </div>
+                </div>
+
+                <div id="currentModelInfo" style="
+            background: white;
+            border: 1px solid #e8f0fe;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+          ">
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="spinner" style="margin-right: 10px;"></div>
+                    <div id="currentModelName" style="font-size: 16px; font-weight: 600; color: #1a73e8;">
+                      Loading model...
+                    </div>
+                  </div>
+                  <div id="currentModelStatus" style="font-size: 13px; color: #5f6368;">
+                    Preparing to train...
+                  </div>
+                </div>
+
+                <!-- Model Details -->
+                <div class="row mt-3">
+                  <div class="col-md-4">
+                    <div style="font-size: 12px; color: #5f6368; margin-bottom: 4px;">Stage</div>
+                    <div id="currentModelStage" style="font-size: 14px; font-weight: 500; color: #1a73e8;">
+                      -
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div style="font-size: 12px; color: #5f6368; margin-bottom: 4px;">Type</div>
+                    <div id="currentModelType" style="font-size: 14px; font-weight: 500; color: #5f6368;">
+                      -
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div style="font-size: 12px; color: #5f6368; margin-bottom: 4px;">Time</div>
+                    <div id="currentModelTime" style="font-size: 14px; font-weight: 500; color: #5f6368;">
+                      0s
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Training Statistics -->
+              <div class="stats-grid" style="
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 15px;
+          margin-bottom: 20px;
+        ">
+                <div class="stat-card" style="
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+          ">
+                  <div id="completedModels" class="stat-value" style="
+              font-size: 24px;
+              font-weight: 700;
+              color: #1e293b;
+            ">0</div>
+                  <div class="stat-label" style="
+              font-size: 12px;
+              color: #64748b;
+              margin-top: 4px;
+            ">Completed Models</div>
+                </div>
+                <div class="stat-card" style="
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+          ">
+                  <div id="remainingModels" class="stat-value" style="
+              font-size: 24px;
+              font-weight: 700;
+              color: #1e293b;
+            ">0</div>
+                  <div class="stat-label" style="
+              font-size: 12px;
+              color: #64748b;
+              margin-top: 4px;
+            ">Remaining Models</div>
+                </div>
+                <div class="stat-card" style="
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+          ">
+                  <div id="totalTime" class="stat-value" style="
+              font-size: 24px;
+              font-weight: 700;
+              color: #1e293b;
+            ">0s</div>
+                  <div class="stat-label" style="
+              font-size: 12px;
+              color: #64748b;
+              margin-top: 4px;
+            ">Total Time</div>
+                </div>
+              </div>
+
+              <!-- Training Status Message -->
+              <div id="statusMessage" style="
+          background: #e8f0fe;
+          border-left: 4px solid #1a73e8;
+          padding: 12px 16px;
+          border-radius: 4px;
+          margin-bottom: 20px;
+          display: none;
+        ">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-info-circle mr-2" style="color: #1a73e8;"></i>
+                  <span id="statusMessageText" style="font-size: 13px; color: #3c4043;">
+                    Training in progress...
+                  </span>
+                </div>
+              </div>
+
+              <!-- View Results Button -->
+              <div id="resultsButtonContainer"
+                style="display: none; text-align: center; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                <a href="/results" class="btn" style="
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          ">
+                  <i class="fas fa-chart-bar"></i>
+                  View Training Results
+                </a>
+                <p style="color: #5f6368; font-size: 14px; margin-top: 12px;">
+                  Training completed successfully! Click to view detailed results.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Models Tab -->
+      <div id="modelsTab" class="tab-content">
+        <div class="config-card">
+          <div class="config-header">Available Models</div>
+          <div class="config-body">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Type</th>
+                  <th>Complexity</th>
+                </tr>
+              </thead>
+              <tbody id="modelsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs Tab -->
+      <div id="logsTab" class="tab-content">
+        <div class="config-card">
+          <div class="config-header">
+            <div class="flex-between">
+              <span>Training Log</span>
+              <div>
+                <button id="clearLogBtn" class="btn btn-sec btn-sm">Clear</button>
+              </div>
+            </div>
+          </div>
+          <div class="config-body p-0">
+            <div class="log-container" id="trainingLog">
+              <div class="log-entry">
+                <span class="log-time">{{ now().strftime('%H:%M:%S') }}</span>
+                <span class="log-message">System ready. Configure and start training.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TrainingSystem = {
+
+    state: {
+      selectedModels: [],
+      availableModels: [],
+      modelParameters: {},
+      isTraining: false,
+      progressInterval: null,
+      startTime: null,
+      isZeroInflated: '{{ task_type }}'.includes('zero_inflated'),
+      currentStage: 'classification',
+      stageModels: {
+        classification: [],
+        regression: []
+      },
+      stageProgress: {
+        classification: { completed: 0, total: 0 },
+        regression: { completed: 0, total: 0 }
+      },
+      modelDisplayTracker: {
+        lastModel: null,
+        modelStartTime: 0,
+        minDuration: 5000 // 5 seconds minimum per model
+      },
+      // Model registry remains the same
+      modelRegistry: {
+        "linear": {
+          "regression": {
+            "linear_regression": {
+              "label": "Linear Regression",
+              "params": {
+                "fit_intercept": { "type": "bool", "default": true, "description": "Whether to calculate the intercept for this model. If False, no intercept will be used in calculations." },
+                "copy_X": { "type": "bool", "default": true, "description": "If True, X will be copied; else, it may be overwritten." },
+                "positive": { "type": "bool", "default": false, "description": "When set to True, forces the coefficients to be positive." },
+                "n_jobs": { "type": "int", "min": 1, "max": 8, "step": 1, "default": 1, "description": "The number of jobs to use for the computation." }
+              }
+            },
+            "ridge": {
+              "label": "Ridge Regression",
+              "params": {
+                "alpha": { "type": "float", "min": 0.01, "max": 100, "step": 0.1, "default": 1.0, "description": "Regularization strength; must be a positive float. Larger values specify stronger regularization." },
+                "fit_intercept": { "type": "bool", "default": true, "description": "Whether to calculate the intercept for this model." },
+                "copy_X": { "type": "bool", "default": true, "description": "If True, X will be copied; else, it may be overwritten." },
+                "max_iter": { "type": "int", "min": 100, "max": 10000, "step": 100, "default": 1000, "description": "Maximum number of iterations for conjugate gradient solver." },
+                "tol": { "type": "float", "min": 1e-6, "max": 1e-2, "step": 1e-5, "default": 1e-3, "description": "Precision of the solution." },
+                "solver": {
+                  "type": "select",
+                  "options": ["auto", "svd", "cholesky", "lsqr", "sparse_cg", "sag", "saga", "lbfgs"],
+                  "default": "auto",
+                  "description": "Solver to use in the computational routines."
+                },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Seed used by the random number generator." }
+              }
+            },
+            "lasso": {
+              "label": "Lasso Regression",
+              "params": {
+                "alpha": { "type": "float", "min": 0.001, "max": 10, "step": 0.01, "default": 0.1, "description": "Constant that multiplies the L1 term. Defaults to 1.0." },
+                "fit_intercept": { "type": "bool", "default": true, "description": "Whether to calculate the intercept for this model." },
+                "normalize": { "type": "bool", "default": false, "description": "This parameter is ignored when fit_intercept is set to False." },
+                "precompute": { "type": "bool", "default": false, "description": "Whether to use a precomputed Gram matrix to speed up calculations." },
+                "copy_X": { "type": "bool", "default": true, "description": "If True, X will be copied; else, it may be overwritten." },
+                "max_iter": { "type": "int", "min": 500, "max": 20000, "step": 500, "default": 10000, "description": "The maximum number of iterations." },
+                "tol": { "type": "float", "min": 1e-5, "max": 1e-2, "step": 1e-5, "default": 1e-3, "description": "The tolerance for the optimization." },
+                "warm_start": { "type": "bool", "default": false, "description": "When set to True, reuse the solution of the previous call to fit as initialization." },
+                "positive": { "type": "bool", "default": false, "description": "When set to True, forces the coefficients to be positive." },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Seed used by the random number generator." },
+                "selection": {
+                  "type": "select",
+                  "options": ["cyclic", "random"],
+                  "default": "cyclic",
+                  "description": "If set to 'random', a random coefficient is updated every iteration."
+                }
+              }
+            }
+          },
+          "classification": {
+            "logistic_regression": {
+              "label": "Logistic Regression",
+              "params": {
+                "C": { "type": "float", "min": 0.01, "max": 10, "step": 0.1, "default": 1.0, "description": "Inverse of regularization strength; must be a positive float." },
+                "fit_intercept": { "type": "bool", "default": true, "description": "Specifies if a constant (a.k.a. bias or intercept) should be added to the decision function." },
+                "max_iter": { "type": "int", "min": 100, "max": 10000, "step": 100, "default": 3000, "description": "Maximum number of iterations taken for the solvers to converge." },
+                "tol": { "type": "float", "min": 1e-5, "max": 1e-2, "step": 1e-5, "default": 1e-3, "description": "Tolerance for stopping criteria." },
+                "solver": {
+                  "type": "select",
+                  "options": ["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"],
+                  "default": "lbfgs",
+                  "description": "Algorithm to use in the optimization problem."
+                },
+                "penalty": {
+                  "type": "select",
+                  "options": ["l1", "l2", "elasticnet", "none"],
+                  "default": "l2",
+                  "description": "Specify the norm of the penalty."
+                },
+                "class_weight": {
+                  "type": "select",
+                  "options": [null, "balanced"],
+                  "default": null,
+                  "description": "Weights associated with classes. If not given, all classes are supposed to have weight one."
+                },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Seed used by the random number generator." },
+                "warm_start": { "type": "bool", "default": false, "description": "When set to True, reuse the solution of the previous call to fit as initialization." },
+                "verbose": { "type": "int", "min": 0, "max": 10, "step": 1, "default": 0, "description": "For the 'liblinear' and 'lbfgs' solvers, set verbose to any positive number for verbosity." }
+              }
+            }
+          }
+        },
+        "tree": {
+          "regression": {
+            "random_forest_regressor": {
+              "label": "Random Forest Regressor",
+              "params": {
+                "n_estimators": { "type": "int", "min": 10, "max": 1000, "step": 10, "default": 100, "description": "The number of trees in the forest." },
+                "criterion": {
+                  "type": "select",
+                  "options": ["squared_error", "absolute_error", "friedman_mse", "poisson"],
+                  "default": "squared_error",
+                  "description": "The function to measure the quality of a split."
+                },
+                "max_depth": { "type": "int", "min": 1, "max": 100, "step": 1, "default": null, "description": "The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure." },
+                "min_samples_split": { "type": "int", "min": 2, "max": 20, "step": 1, "default": 2, "description": "The minimum number of samples required to split an internal node." },
+                "min_samples_leaf": { "type": "int", "min": 1, "max": 20, "step": 1, "default": 1, "description": "The minimum number of samples required to be at a leaf node." },
+                "max_features": {
+                  "type": "select",
+                  "options": ["auto", "sqrt", "log2", null],
+                  "default": null,
+                  "description": "The number of features to consider when looking for the best split."
+                },
+                "bootstrap": { "type": "bool", "default": true, "description": "Whether bootstrap samples are used when building trees." },
+                "oob_score": { "type": "bool", "default": false, "description": "Whether to use out-of-bag samples to estimate the generalization score." },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Controls both the randomness of the bootstrapping and the sampling of the features." },
+                "warm_start": { "type": "bool", "default": false, "description": "When set to True, reuse the solution of the previous call to fit and add more estimators to the ensemble." },
+                "ccp_alpha": { "type": "float", "min": 0, "max": 1, "step": 0.001, "default": 0, "description": "Complexity parameter used for Minimal Cost-Complexity Pruning." },
+                "max_samples": { "type": "float", "min": 0.1, "max": 1, "step": 0.05, "default": null, "description": "If bootstrap is True, the number of samples to draw from X to train each base estimator." }
+              }
+            },
+            "gradient_boosting_regressor": {
+              "label": "Gradient Boosting Regressor",
+              "params": {
+                "loss": {
+                  "type": "select",
+                  "options": ["squared_error", "absolute_error", "huber", "quantile"],
+                  "default": "squared_error",
+                  "description": "Loss function to be optimized."
+                },
+                "learning_rate": { "type": "float", "min": 0.01, "max": 1, "step": 0.01, "default": 0.1, "description": "Learning rate shrinks the contribution of each tree by learning_rate." },
+                "n_estimators": { "type": "int", "min": 10, "max": 1000, "step": 10, "default": 100, "description": "The number of boosting stages to perform." },
+                "subsample": { "type": "float", "min": 0.1, "max": 1, "step": 0.05, "default": 1.0, "description": "The fraction of samples to be used for fitting the individual base learners." },
+                "criterion": {
+                  "type": "select",
+                  "options": ["friedman_mse", "squared_error"],
+                  "default": "friedman_mse",
+                  "description": "The function to measure the quality of a split."
+                },
+                "min_samples_split": { "type": "int", "min": 2, "max": 20, "step": 1, "default": 2, "description": "The minimum number of samples required to split an internal node." },
+                "min_samples_leaf": { "type": "int", "min": 1, "max": 20, "step": 1, "default": 1, "description": "The minimum number of samples required to be at a leaf node." },
+                "max_depth": { "type": "int", "min": 1, "max": 20, "step": 1, "default": 3, "description": "Maximum depth of the individual regression estimators." },
+                "min_impurity_decrease": { "type": "float", "min": 0, "max": 0.5, "step": 0.001, "default": 0, "description": "A node will be split if this split induces a decrease of the impurity greater than or equal to this value." },
+                "init": {
+                  "type": "select",
+                  "options": ["zero", null],
+                  "default": null,
+                  "description": "An estimator object that is used to compute the initial predictions."
+                },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Controls the random seed given to each Tree estimator at each boosting iteration." },
+                "max_features": {
+                  "type": "select",
+                  "options": ["auto", "sqrt", "log2", null],
+                  "default": null,
+                  "description": "The number of features to consider when looking for the best split."
+                },
+                "alpha": { "type": "float", "min": 0.01, "max": 0.99, "step": 0.01, "default": 0.9, "description": "The alpha-quantile of the huber loss function and the quantile loss function." },
+                "verbose": { "type": "int", "min": 0, "max": 10, "step": 1, "default": 0, "description": "Enable verbose output. If 1 then it prints progress and performance once in a while." },
+                "max_leaf_nodes": { "type": "int", "min": 2, "max": 100, "step": 1, "default": null, "description": "Grow trees with max_leaf_nodes in best-first fashion." },
+                "warm_start": { "type": "bool", "default": false, "description": "When set to True, reuse the solution of the previous call to fit and add more estimators to the ensemble." },
+                "validation_fraction": { "type": "float", "min": 0.01, "max": 0.5, "step": 0.01, "default": 0.1, "description": "The proportion of training data to set aside as validation set for early stopping." },
+                "n_iter_no_change": { "type": "int", "min": 1, "max": 100, "step": 1, "default": null, "description": "Used to decide if early stopping will be used to terminate training when validation score is not improving." },
+                "tol": { "type": "float", "min": 1e-6, "max": 1e-2, "step": 1e-5, "default": 1e-3, "description": "Tolerance for the early stopping." },
+                "ccp_alpha": { "type": "float", "min": 0, "max": 1, "step": 0.001, "default": 0, "description": "Complexity parameter used for Minimal Cost-Complexity Pruning." }
+              }
+            }
+          },
+          "classification": {
+            "random_forest_classifier": {
+              "label": "Random Forest Classifier",
+              "params": {
+                "n_estimators": { "type": "int", "min": 10, "max": 1000, "step": 10, "default": 100, "description": "The number of trees in the forest." },
+                "criterion": {
+                  "type": "select",
+                  "options": ["gini", "entropy", "log_loss"],
+                  "default": "gini",
+                  "description": "The function to measure the quality of a split."
+                },
+                "max_depth": { "type": "int", "min": 1, "max": 100, "step": 1, "default": null, "description": "The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure." },
+                "min_samples_split": { "type": "int", "min": 2, "max": 20, "step": 1, "default": 2, "description": "The minimum number of samples required to split an internal node." },
+                "min_samples_leaf": { "type": "int", "min": 1, "max": 20, "step": 1, "default": 1, "description": "The minimum number of samples required to be at a leaf node." },
+                "max_features": {
+                  "type": "select",
+                  "options": ["auto", "sqrt", "log2", null],
+                  "default": null,
+                  "description": "The number of features to consider when looking for the best split."
+                },
+                "bootstrap": { "type": "bool", "default": true, "description": "Whether bootstrap samples are used when building trees." },
+                "oob_score": { "type": "bool", "default": false, "description": "Whether to use out-of-bag samples to estimate the generalization accuracy." },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Controls both the randomness of the bootstrapping and the sampling of the features." },
+                "warm_start": { "type": "bool", "default": false, "description": "When set to True, reuse the solution of the previous call to fit and add more estimators to the ensemble." },
+                "class_weight": {
+                  "type": "select",
+                  "options": [null, "balanced", "balanced_subsample"],
+                  "default": null,
+                  "description": "Weights associated with classes."
+                },
+                "ccp_alpha": { "type": "float", "min": 0, "max": 1, "step": 0.001, "default": 0, "description": "Complexity parameter used for Minimal Cost-Complexity Pruning." },
+                "max_samples": { "type": "float", "min": 0.1, "max": 1, "step": 0.05, "default": null, "description": "If bootstrap is True, the number of samples to draw from X to train each base estimator." }
+              }
+            },
+            "gradient_boosting_classifier": {
+              "label": "Gradient Boosting Classifier",
+              "params": {
+                "loss": {
+                  "type": "select",
+                  "options": ["log_loss", "exponential"],
+                  "default": "log_loss",
+                  "description": "Loss function to be optimized."
+                },
+                "learning_rate": { "type": "float", "min": 0.01, "max": 1, "step": 0.01, "default": 0.1, "description": "Learning rate shrinks the contribution of each tree by learning_rate." },
+                "n_estimators": { "type": "int", "min": 10, "max": 1000, "step": 10, "default": 100, "description": "The number of boosting stages to perform." },
+                "subsample": { "type": "float", "min": 0.1, "max": 1, "step": 0.05, "default": 1.0, "description": "The fraction of samples to be used for fitting the individual base learners." },
+                "criterion": {
+                  "type": "select",
+                  "options": ["friedman_mse", "squared_error"],
+                  "default": "friedman_mse",
+                  "description": "The function to measure the quality of a split."
+                },
+                "min_samples_split": { "type": "int", "min": 2, "max": 20, "step": 1, "default": 2, "description": "The minimum number of samples required to split an internal node." },
+                "min_samples_leaf": { "type": "int", "min": 1, "max": 20, "step": 1, "default": 1, "description": "The minimum number of samples required to be at a leaf node." },
+                "max_depth": { "type": "int", "min": 1, "max": 20, "step": 1, "default": 3, "description": "Maximum depth of the individual regression estimators." },
+                "min_impurity_decrease": { "type": "float", "min": 0, "max": 0.5, "step": 0.001, "default": 0, "description": "A node will be split if this split induces a decrease of the impurity greater than or equal to this value." },
+                "init": {
+                  "type": "select",
+                  "options": ["zero", null],
+                  "default": null,
+                  "description": "An estimator object that is used to compute the initial predictions."
+                },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Controls the random seed given to each Tree estimator at each boosting iteration." },
+                "max_features": {
+                  "type": "select",
+                  "options": ["auto", "sqrt", "log2", null],
+                  "default": null,
+                  "description": "The number of features to consider when looking for the best split."
+                },
+                "verbose": { "type": "int", "min": 0, "max": 10, "step": 1, "default": 0, "description": "Enable verbose output. If 1 then it prints progress and performance once in a while." },
+                "max_leaf_nodes": { "type": "int", "min": 2, "max": 100, "step": 1, "default": null, "description": "Grow trees with max_leaf_nodes in best-first fashion." },
+                "warm_start": { "type": "bool", "default": false, "description": "When set to True, reuse the solution of the previous call to fit and add more estimators to the ensemble." },
+                "validation_fraction": { "type": "float", "min": 0.01, "max": 0.5, "step": 0.01, "default": 0.1, "description": "The proportion of training data to set aside as validation set for early stopping." },
+                "n_iter_no_change": { "type": "int", "min": 1, "max": 100, "step": 1, "default": null, "description": "Used to decide if early stopping will be used to terminate training when validation score is not improving." },
+                "tol": { "type": "float", "min": 1e-6, "max": 1e-2, "step": 1e-5, "default": 1e-3, "description": "Tolerance for the early stopping." },
+                "ccp_alpha": { "type": "float", "min": 0, "max": 1, "step": 0.001, "default": 0, "description": "Complexity parameter used for Minimal Cost-Complexity Pruning." }
+              }
+            }
+          }
+        },
+        "knn": {
+          "regression": {
+            "knn_regressor": {
+              "label": "KNN Regressor",
+              "params": {
+                "n_neighbors": { "type": "int", "min": 1, "max": 50, "step": 1, "default": 5, "description": "Number of neighbors to use." },
+                "weights": {
+                  "type": "select",
+                  "options": ["uniform", "distance"],
+                  "default": "uniform",
+                  "description": "Weight function used in prediction."
+                },
+                "algorithm": {
+                  "type": "select",
+                  "options": ["auto", "ball_tree", "kd_tree", "brute"],
+                  "default": "auto",
+                  "description": "Algorithm used to compute the nearest neighbors."
+                },
+                "leaf_size": { "type": "int", "min": 10, "max": 100, "step": 5, "default": 30, "description": "Leaf size passed to BallTree or KDTree." },
+                "p": { "type": "int", "min": 1, "max": 5, "step": 1, "default": 2, "description": "Power parameter for the Minkowski metric." },
+                "metric": {
+                  "type": "select",
+                  "options": ["euclidean", "manhattan", "chebyshev", "minkowski"],
+                  "default": "euclidean",
+                  "description": "The distance metric to use for the tree."
+                },
+                "n_jobs": { "type": "int", "min": 1, "max": 8, "step": 1, "default": null, "description": "The number of parallel jobs to run for neighbors search." }
+              }
+            }
+          },
+          "classification": {
+            "knn_classifier": {
+              "label": "KNN Classifier",
+              "params": {
+                "n_neighbors": { "type": "int", "min": 1, "max": 50, "step": 1, "default": 5, "description": "Number of neighbors to use." },
+                "weights": {
+                  "type": "select",
+                  "options": ["uniform", "distance"],
+                  "default": "uniform",
+                  "description": "Weight function used in prediction."
+                },
+                "algorithm": {
+                  "type": "select",
+                  "options": ["auto", "ball_tree", "kd_tree", "brute"],
+                  "default": "auto",
+                  "description": "Algorithm used to compute the nearest neighbors."
+                },
+                "leaf_size": { "type": "int", "min": 10, "max": 100, "step": 5, "default": 30, "description": "Leaf size passed to BallTree or KDTree." },
+                "p": { "type": "int", "min": 1, "max": 5, "step": 1, "default": 2, "description": "Power parameter for the Minkowski metric." },
+                "metric": {
+                  "type": "select",
+                  "options": ["euclidean", "manhattan", "chebyshev", "minkowski"],
+                  "default": "euclidean",
+                  "description": "The distance metric to use for the tree."
+                },
+                "n_jobs": { "type": "int", "min": 1, "max": 8, "step": 1, "default": null, "description": "The number of parallel jobs to run for neighbors search." }
+              }
+            }
+          }
+        },
+        "svm": {
+          "regression": {
+            "svr": {
+              "label": "Support Vector Regressor",
+              "params": {
+                "kernel": {
+                  "type": "select",
+                  "options": ["linear", "poly", "rbf", "sigmoid"],
+                  "default": "rbf",
+                  "description": "Specifies the kernel type to be used in the algorithm."
+                },
+                "degree": { "type": "int", "min": 2, "max": 10, "step": 1, "default": 3, "description": "Degree of the polynomial kernel function ('poly')." },
+                "gamma": {
+                  "type": "select",
+                  "options": ["scale", "auto"],
+                  "default": "scale",
+                  "description": "Kernel coefficient for 'rbf', 'poly' and 'sigmoid'."
+                },
+                "coef0": { "type": "float", "min": 0, "max": 10, "step": 0.1, "default": 0.0, "description": "Independent term in kernel function." },
+                "tol": { "type": "float", "min": 1e-5, "max": 1e-1, "step": 1e-5, "default": 1e-3, "description": "Tolerance for stopping criterion." },
+                "C": { "type": "float", "min": 0.1, "max": 100, "step": 0.1, "default": 1.0, "description": "Regularization parameter. The strength of the regularization is inversely proportional to C." },
+                "epsilon": { "type": "float", "min": 0, "max": 1, "step": 0.01, "default": 0.1, "description": "Epsilon in the epsilon-SVR model." },
+                "shrinking": { "type": "bool", "default": true, "description": "Whether to use the shrinking heuristic." },
+                "cache_size": { "type": "int", "min": 100, "max": 5000, "step": 100, "default": 200, "description": "Specify the size of the kernel cache (in MB)." },
+                "max_iter": { "type": "int", "min": -1, "max": 10000, "step": 100, "default": -1, "description": "Hard limit on iterations within solver, or -1 for no limit." },
+                "verbose": { "type": "bool", "default": false, "description": "Enable verbose output." }
+              }
+            }
+          },
+          "classification": {
+            "svm": {
+              "label": "Support Vector Machine",
+              "params": {
+                "C": { "type": "float", "min": 0.1, "max": 100, "step": 0.1, "default": 1.0, "description": "Regularization parameter. The strength of the regularization is inversely proportional to C." },
+                "kernel": {
+                  "type": "select",
+                  "options": ["linear", "poly", "rbf", "sigmoid"],
+                  "default": "rbf",
+                  "description": "Specifies the kernel type to be used in the algorithm."
+                },
+                "degree": { "type": "int", "min": 2, "max": 10, "step": 1, "default": 3, "description": "Degree of the polynomial kernel function ('poly')." },
+                "gamma": {
+                  "type": "select",
+                  "options": ["scale", "auto"],
+                  "default": "scale",
+                  "description": "Kernel coefficient for 'rbf', 'poly' and 'sigmoid'."
+                },
+                "coef0": { "type": "float", "min": 0, "max": 10, "step": 0.1, "default": 0.0, "description": "Independent term in kernel function." },
+                "shrinking": { "type": "bool", "default": true, "description": "Whether to use the shrinking heuristic." },
+                "probability": { "type": "bool", "default": false, "description": "Whether to enable probability estimates." },
+                "tol": { "type": "float", "min": 1e-5, "max": 1e-1, "step": 1e-5, "default": 1e-3, "description": "Tolerance for stopping criterion." },
+                "cache_size": { "type": "int", "min": 100, "max": 5000, "step": 100, "default": 200, "description": "Specify the size of the kernel cache (in MB)." },
+                "class_weight": {
+                  "type": "select",
+                  "options": [null, "balanced"],
+                  "default": null,
+                  "description": "Set the parameter C of class i to class_weight[i]*C for SVC."
+                },
+                "verbose": { "type": "bool", "default": false, "description": "Enable verbose output." },
+                "max_iter": { "type": "int", "min": -1, "max": 10000, "step": 100, "default": -1, "description": "Hard limit on iterations within solver, or -1 for no limit." }
+              }
+            }
+          }
+        },
+        "ensemble": {
+          "regression": {
+            "adaboost_regressor": {
+              "label": "AdaBoost Regressor",
+              "params": {
+                "n_estimators": { "type": "int", "min": 10, "max": 1000, "step": 10, "default": 100, "description": "The maximum number of estimators at which boosting is terminated." },
+                "learning_rate": { "type": "float", "min": 0.01, "max": 2, "step": 0.01, "default": 1.0, "description": "Learning rate shrinks the contribution of each classifier." },
+                "loss": {
+                  "type": "select",
+                  "options": ["linear", "square", "exponential"],
+                  "default": "linear",
+                  "description": "The loss function to use when updating the weights after each boosting iteration."
+                },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Controls the random seed given at each base_estimator at each boosting iteration." }
+              }
+            }
+          },
+          "classification": {
+            "adaboost_classifier": {
+              "label": "AdaBoost Classifier",
+              "params": {
+                "n_estimators": { "type": "int", "min": 10, "max": 1000, "step": 10, "default": 100, "description": "The maximum number of estimators at which boosting is terminated." },
+                "learning_rate": { "type": "float", "min": 0.01, "max": 2, "step": 0.01, "default": 1.0, "description": "Learning rate shrinks the contribution of each classifier." },
+                "algorithm": {
+                  "type": "select",
+                  "options": ["SAMME"],
+                  "default": "SAMME",
+                  "description": "If 'SAMME.R' then use the SAMME.R real boosting algorithm."
+                },
+                "random_state": { "type": "int", "min": 1, "max": 1000, "step": 1, "default": null, "description": "Controls the random seed given at each base_estimator at each boosting iteration." }
+              }
+            }
+          }
+        }
+      },
+
+      modelCategories: [
+        { id: 'linear', name: 'Linear Models', icon: 'fas fa-chart-line' },
+        { id: 'tree', name: 'Tree Models', icon: 'fas fa-tree' },
+        { id: 'knn', name: 'KNN Models', icon: 'fas fa-project-diagram' },
+        { id: 'svm', name: 'SVM Models', icon: 'fas fa-expand-arrows-alt' },
+        { id: 'ensemble', name: 'Ensemble Models', icon: 'fas fa-layer-group' }
+      ],
+
+      modelCategoryMap: {
+        'linear_regression': 'linear',
+        'ridge': 'linear',
+        'lasso': 'linear',
+        'logistic_regression': 'linear',
+        'random_forest_regressor': 'tree',
+        'gradient_boosting_regressor': 'tree',
+        'random_forest_classifier': 'tree',
+        'gradient_boosting_classifier': 'tree',
+        'knn_regressor': 'knn',
+        'knn_classifier': 'knn',
+        'svr': 'svm',
+        'svm': 'svm',
+        'adaboost_regressor': 'ensemble',
+        'adaboost_classifier': 'ensemble'
+      }
+    },
+
+    init() {
+      console.log('Training System Initialized');
+      console.log('Task type:', '{{ task_type }}');
+      console.log('Is zero inflated:', this.state.isZeroInflated);
+
+      this.loadAvailableModels();
+      this.setupTabs();
+      this.setupEventListeners();
+
+      if (this.state.isZeroInflated) {
+        document.getElementById('zeroInflationInfo').style.display = 'block';
+        const taskDisplay = document.getElementById('taskTypeDisplay');
+        if (taskDisplay) {
+          taskDisplay.innerHTML = '{{ task_type|replace("_", " ")|title }} <span class="zero-inflation-badge"><i class="fas fa-layer-group"></i> Zero-Inflated</span>';
+        }
+      }
+
+      this.checkExistingTraining();
+    },
+
+    setupEventListeners() {
+      document.querySelectorAll('input[name="model_mode"]').forEach(radio => {
+        radio.addEventListener('change', () => this.updateMode());
+      });
+
+      document.querySelectorAll('input[name="tuning_mode"]').forEach(radio => {
+        radio.addEventListener('change', () => this.updateTuning());
+      });
+
+      document.getElementById('startTrainingBtn').addEventListener('click', () => this.startTraining());
+      document.getElementById('resetTrainingBtn').addEventListener('click', () => this.resetTraining());
+      document.getElementById('clearLogBtn').addEventListener('click', () => this.clearLog());
+
+      this.setupTabs();
+
+      window.addEventListener('pageshow', (e) => {
+        // If user navigated back while training was running, check status
+        if (e.persisted) {
+          fetch('/api/training_status')
+            .then(r => r.json())
+            .then(status => {
+              if (status.running) {
+                document.getElementById('startTrainingBtn').disabled = true;
+                document.getElementById('emptyState') && (document.getElementById('emptyState').style.display = 'none');
+                document.getElementById('progressContainer') && (document.getElementById('progressContainer').style.display = 'block');
+              }
+            }).catch(() => { });
+        }
+      });
+      window.addEventListener('beforeunload', (e) => {
+        if (this.state.isTraining) {
+          e.preventDefault();
+          e.returnValue = 'Training is in progress. Are you sure you want to leave?';
+          return e.returnValue;
+        }
+      });
+    },
+
+    async loadAvailableModels() {
+      try {
+        const taskType = '{{ task_type }}';
+        const isRegression = taskType.includes('regression');
+
+        const allModels = [];
+
+        for (const [category, tasks] of Object.entries(this.state.modelRegistry)) {
+          const taskKey = isRegression ? 'regression' : 'classification';
+          if (tasks[taskKey]) {
+            for (const [modelKey, modelConfig] of Object.entries(tasks[taskKey])) {
+              allModels.push({
+                key: modelKey,
+                name: modelConfig.label,
+                category: this.state.modelCategoryMap[modelKey] || category,
+                description: this.getModelDescription(modelKey, category, taskType)
+              });
+            }
+          }
+
+          if (this.state.isZeroInflated) {
+            const otherTaskKey = isRegression ? 'classification' : 'regression';
+            if (tasks[otherTaskKey]) {
+              for (const [modelKey, modelConfig] of Object.entries(tasks[otherTaskKey])) {
+                allModels.push({
+                  key: modelKey,
+                  name: modelConfig.label,
+                  category: this.state.modelCategoryMap[modelKey] || category,
+                  description: this.getModelDescription(modelKey, category, taskType)
+                });
+              }
+            }
+          }
+        }
+
+        this.state.availableModels = allModels;
+        console.log(`Loaded ${allModels.length} models for ${taskType}`);
+
+        this.renderModelCategories();
+        this.renderModelsTable();
+
+      } catch (error) {
+        console.error('Failed to load models:', error);
+        this.loadFallbackModels();
+      }
+    },
+
+    getModelDescription(key, category, taskType) {
+      if (key.includes('regressor') || key === 'svr' || key === 'ridge' || key === 'lasso' || key === 'linear_regression') {
+        return `${category} regressor`;
+      } else if (key.includes('classifier') || key === 'svm' || key === 'logistic_regression') {
+        return `${category} classifier`;
+      } else if (this.state.isZeroInflated) {
+        if (key.includes('regressor') || key === 'svr' || key === 'ridge' || key === 'lasso' || key === 'linear_regression') {
+          return `${category} regression model (for non-zero values)`;
+        } else if (key.includes('classifier') || key === 'svm' || key === 'logistic_regression') {
+          return `${category} classification model (for zero vs non-zero)`;
+        }
+      }
+      return `${category} model`;
+    },
+
+    loadFallbackModels() {
+      const taskType = '{{ task_type }}';
+      const isRegression = taskType.includes('regression') && !taskType.includes('classification');
+
+      const fallbackModels = isRegression ? [
+        { key: 'linear_regression', name: 'Linear Regression', category: 'linear', description: 'Ordinary least squares' },
+        { key: 'ridge', name: 'Ridge Regression', category: 'linear', description: 'L2 regularized linear regression' },
+        { key: 'lasso', name: 'Lasso Regression', category: 'linear', description: 'L1 regularized linear regression' },
+        { key: 'random_forest_regressor', name: 'Random Forest Regressor', category: 'tree', description: 'Random forest regression' },
+        { key: 'gradient_boosting_regressor', name: 'Gradient Boosting Regressor', category: 'tree', description: 'Gradient boosting regression' },
+        { key: 'svr', name: 'Support Vector Regressor', category: 'svm', description: 'SVM regression' },
+        { key: 'knn_regressor', name: 'KNN Regressor', category: 'knn', description: 'K-nearest neighbors regression' },
+        { key: 'adaboost_regressor', name: 'AdaBoost Regressor', category: 'ensemble', description: 'Adaptive boosting regression' }
+      ] : [
+        { key: 'logistic_regression', name: 'Logistic Regression', category: 'linear', description: 'Logistic regression classifier' },
+        { key: 'random_forest_classifier', name: 'Random Forest Classifier', category: 'tree', description: 'Random forest classification' },
+        { key: 'gradient_boosting_classifier', name: 'Gradient Boosting Classifier', category: 'tree', description: 'Gradient boosting classification' },
+        { key: 'svm', name: 'Support Vector Machine', category: 'svm', description: 'SVM classification' },
+        { key: 'knn_classifier', name: 'KNN Classifier', category: 'knn', description: 'K-nearest neighbors classification' },
+        { key: 'adaboost_classifier', name: 'AdaBoost Classifier', category: 'ensemble', description: 'Adaptive boosting classification' }
+      ];
+
+      this.state.availableModels = fallbackModels;
+      this.renderModelCategories();
+      this.renderModelsTable();
+    },
+
+    renderModelCategories() {
+      const tabsContainer = document.getElementById('modelCategoryTabs');
+      const contentContainer = document.getElementById('modelCategoryContent');
+
+      if (!tabsContainer || !contentContainer) return;
+
+      let tabsHtml = '';
+      let contentHtml = '';
+
+      this.state.modelCategories.forEach((category, index) => {
+        const modelsInCategory = this.state.availableModels.filter(
+          model => model.category === category.id
+        );
+
+        if (modelsInCategory.length === 0) return;
+
+        const isActive = index === 0;
+
+        tabsHtml += `
+          <div class="model-category-tab ${isActive ? 'active' : ''}" 
+               onclick="TrainingSystem.switchModelCategory('${category.id}')">
+            ${category.name}
+          </div>
+        `;
+
+        contentHtml += `
+          <div class="model-category-content ${isActive ? 'active' : ''}" id="category_${category.id}">
+            ${this.renderModelsInCategory(category.id)}
+          </div>
+        `;
+      });
+
+      tabsContainer.innerHTML = tabsHtml;
+      contentContainer.innerHTML = contentHtml;
+    },
+
+    switchModelCategory(categoryId) {
+      document.querySelectorAll('.model-category-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.model-category-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      const tab = document.querySelector(`.model-category-tab[onclick*="${categoryId}"]`);
+      const content = document.getElementById(`category_${categoryId}`);
+
+      if (tab) tab.classList.add('active');
+      if (content) content.classList.add('active');
+    },
+
+    renderModelsInCategory(categoryId) {
+      const modelsInCategory = this.state.availableModels.filter(
+        model => model.category === categoryId
+      );
+
+      if (modelsInCategory.length === 0) {
+        return '<div class="text-center text-muted py-4">No models in this category</div>';
+      }
+
+      let html = '<div class="model-selection-grid">';
+
+      modelsInCategory.forEach(model => {
+        const category = this.state.modelCategories.find(c => c.id === categoryId);
+        const isSelected = this.state.selectedModels.includes(model.key);
+
+        let extraInfo = '';
+        if (this.state.isZeroInflated) {
+          if (model.key.includes('regressor') || model.key === 'svr' || model.key === 'ridge' || model.key === 'lasso' || model.key === 'linear_regression') {
+            extraInfo = '<div style="font-size: 11px; color: #1a73e8; margin-top: 4px;"><i class="fas fa-chart-line"></i> Stage 2: Value Prediction</div>';
+          } else if (model.key.includes('classifier') || model.key === 'svm' || model.key === 'logistic_regression') {
+            extraInfo = '<div style="font-size: 11px; color: #34a853; margin-top: 4px;"><i class="fas fa-project-diagram"></i> Stage 1: Zero Detection</div>';
+          }
+        }
+
+        html += `
+          <div class="model-selection-card ${isSelected ? 'selected' : ''}" 
+               onclick="TrainingSystem.toggleModelSelection('${model.key}')">
+            <div class="model-selection-icon ${categoryId}">
+              <i class="${category?.icon || 'fas fa-cog'}"></i>
+            </div>
+            <div class="model-selection-name">${model.name}</div>
+            <div class="model-selection-type">${model.description}</div>
+            ${extraInfo}
+            <input type="checkbox" class="d-none" id="model_${model.key}" 
+                   value="${model.key}" ${isSelected ? 'checked' : ''}>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      return html;
+    },
+
+    renderModelsTable() {
+      const tbody = document.getElementById('modelsTableBody');
+      if (!tbody) return;
+
+      let html = '';
+      this.state.availableModels.forEach(model => {
+        const category = this.state.modelCategories.find(c => c.id === model.category);
+        const complexity = model.category === 'linear' ? 'Low' :
+          model.category === 'knn' ? 'Medium' : 'High';
+
+        const taskType = '{{ task_type }}';
+        let typeColumn = taskType.includes('regression') ? 'Regressor' : 'Classifier';
+        if (this.state.isZeroInflated) {
+          if (model.key.includes('regressor') || model.key === 'svr' || model.key === 'ridge' ||
+            model.key === 'lasso' || model.key === 'linear_regression') {
+            typeColumn = 'Regression (Stage 2)';
+          } else if (model.key.includes('classifier') || model.key === 'svm' || model.key === 'logistic_regression') {
+            typeColumn = 'Classification (Stage 1)';
+          }
+        }
+
+        html += `
+          <tr>
+            <td>
+              <div style="font-weight: 500;">${model.name}</div>
+              <div style="font-size: 12px; color: #80868b;">${model.key}</div>
+            </td>
+            <td>${category?.name || model.category}</td>
+            <td>${model.description}</td>
+            <td>${typeColumn}</td>
+            <td>${complexity}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    },
+
+    toggleModelSelection(modelKey) {
+      const modelMode = document.querySelector('input[name="model_mode"]:checked').value;
+      if (modelMode === 'auto') return;
+
+      const checkbox = document.getElementById(`model_${modelKey}`);
+      const card = document.querySelector(`.model-selection-card[onclick*="${modelKey}"]`);
+
+      if (!checkbox || !card) return;
+
+      checkbox.checked = !checkbox.checked;
+      const isSelected = checkbox.checked;
+
+      if (isSelected && !this.state.selectedModels.includes(modelKey)) {
+        this.state.selectedModels.push(modelKey);
+        card.classList.add('selected');
+      } else {
+        this.state.selectedModels = this.state.selectedModels.filter(k => k !== modelKey);
+        card.classList.remove('selected');
+      }
+
+      this.updateSelectedModelsCount();
+      this.collectAllParameters();
+      this.updateParameterSections();
+    },
+
+    updateSelectedModelsCount() {
+      const countElement = document.getElementById('selectedModelsCount');
+      if (countElement) {
+        countElement.textContent = this.state.selectedModels.length;
+      }
+    },
+
+    updateMode() {
+      const modelMode = document.querySelector('input[name="model_mode"]:checked').value;
+      const tuningRadios = document.querySelectorAll('input[name="tuning_mode"]');
+      const modelSelection = document.getElementById('modelSelection');
+      const paramsSections = document.getElementById('parameterSections');
+      const manualTuningOption = document.getElementById('manualTuningOption');
+
+      if (modelMode === 'auto') {
+        this.state.selectedModels = [];
+        document.querySelectorAll('.model-selection-card.selected').forEach(card => {
+          card.classList.remove('selected');
+        });
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+        });
+
+        if (modelSelection) modelSelection.style.display = 'none';
+        if (paramsSections) paramsSections.style.display = 'none';
+
+        tuningRadios[0].checked = true;
+        tuningRadios[1].disabled = true;
+        if (manualTuningOption) manualTuningOption.classList.add('disabled');
+
+        this.updateSelectedModelsCount();
+
+      } else {
+        if (modelSelection) modelSelection.style.display = 'block';
+
+        tuningRadios[1].disabled = false;
+        if (manualTuningOption) manualTuningOption.classList.remove('disabled');
+
+        if (this.state.selectedModels.length === 0) {
+          this.autoSelectDefaultModels();
+        }
+      }
+
+      this.updateTuning();
+    },
+
+    autoSelectDefaultModels() {
+      const taskType = '{{ task_type }}';
+      const isRegression = taskType.includes('regression');
+
+      if (isRegression) {
+        const defaultModels = ['random_forest_regressor', 'gradient_boosting_regressor'];
+        defaultModels.forEach(modelKey => {
+          if (this.state.availableModels.some(m => m.key === modelKey) &&
+            !this.state.selectedModels.includes(modelKey)) {
+            this.state.selectedModels.push(modelKey);
+          }
+        });
+      } else {
+        const defaultModels = ['random_forest_classifier', 'gradient_boosting_classifier'];
+        defaultModels.forEach(modelKey => {
+          if (this.state.availableModels.some(m => m.key === modelKey) &&
+            !this.state.selectedModels.includes(modelKey)) {
+            this.state.selectedModels.push(modelKey);
+          }
+        });
+      }
+
+      this.updateSelectedModelsCount();
+
+      setTimeout(() => {
+        this.state.selectedModels.forEach(modelKey => {
+          const card = document.querySelector(`.model-selection-card[onclick*="${modelKey}"]`);
+          const checkbox = document.getElementById(`model_${modelKey}`);
+          if (card) card.classList.add('selected');
+          if (checkbox) checkbox.checked = true;
+        });
+        this.updateParameterSections();
+      }, 100);
+    },
+
+    updateTuning() {
+      const modelMode = document.querySelector('input[name="model_mode"]:checked').value;
+      const tuningMode = document.querySelector('input[name="tuning_mode"]:checked').value;
+      const paramsSections = document.getElementById('parameterSections');
+
+      if (modelMode === 'manual' && tuningMode === 'manual' && this.state.selectedModels.length > 0) {
+        if (paramsSections) {
+          paramsSections.style.display = 'block';
+          this.initializeModelParameters();
+          this.renderParameterCategories();
+        }
+      } else if (paramsSections) {
+        paramsSections.style.display = 'none';
+      }
+    },
+
+    isAutoMode() {
+      return document.querySelector('input[name="model_mode"]:checked')?.value === 'auto';
+    },
+
+    initializeModelParameters() {
+      const taskType = '{{ task_type }}';
+      const isRegression = taskType.includes('regression');
+
+      this.state.selectedModels.forEach(modelKey => {
+        const category = this.state.modelCategoryMap[modelKey];
+        let modelTaskType = isRegression ? 'regression' : 'classification';
+
+        if (this.state.isZeroInflated) {
+          if (modelKey.includes('regressor') || modelKey === 'svr' ||
+            modelKey === 'ridge' || modelKey === 'lasso' ||
+            modelKey === 'linear_regression') {
+            modelTaskType = 'regression';
+          } else if (modelKey.includes('classifier') || modelKey === 'svm' ||
+            modelKey === 'logistic_regression') {
+            modelTaskType = 'classification';
+          }
+        }
+
+        const modelConfig = this.state.modelRegistry[category]?.[modelTaskType]?.[modelKey];
+
+        if (modelConfig && modelConfig.params) {
+          if (!this.state.modelParameters[modelKey]) {
+            this.state.modelParameters[modelKey] = {};
+          }
+
+          Object.entries(modelConfig.params).forEach(([paramName, paramConfig]) => {
+            if (!(paramName in this.state.modelParameters[modelKey])) {
+              this.state.modelParameters[modelKey][paramName] = paramConfig.default;
+            }
+          });
+        }
+      });
+    },
+
+    updateParameterSections() {
+      const tuningMode = document.querySelector('input[name="tuning_mode"]:checked').value;
+      const paramsSections = document.getElementById('parameterSections');
+
+      if (tuningMode === 'manual' && this.state.selectedModels.length > 0) {
+        if (paramsSections) {
+          paramsSections.style.display = 'block';
+          this.initializeModelParameters();
+          this.renderParameterCategories();
+        }
+      } else if (paramsSections) {
+        paramsSections.style.display = 'none';
+      }
+    },
+
+    renderParameterCategories() {
+      const paramsSections = document.getElementById('parameterSections');
+      if (!paramsSections) return;
+
+      this.collectAllParameters();
+
+      const modelsByCategory = {};
+      this.state.selectedModels.forEach(modelKey => {
+        const category = this.state.modelCategoryMap[modelKey] || 'other';
+        if (!modelsByCategory[category]) {
+          modelsByCategory[category] = [];
+        }
+        modelsByCategory[category].push(modelKey);
+      });
+
+      const categoryTabsContainer = document.getElementById('paramSectionTabs');
+      const categoryContentContainer = document.getElementById('paramSectionContent');
+
+      if (!categoryTabsContainer || !categoryContentContainer) return;
+
+      categoryTabsContainer.innerHTML = '';
+      categoryContentContainer.innerHTML = '';
+
+      if (this.state.selectedModels.length === 0) {
+        categoryContentContainer.innerHTML = `
+          <div class="param-category-empty">
+            <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px; color: #5f6368;"></i>
+            <div>No models selected for parameter tuning</div>
+          </div>
+        `;
+        return;
+      }
+
+      const orderedCategories = this.state.modelCategories.filter(cat =>
+        modelsByCategory[cat.id] && modelsByCategory[cat.id].length > 0
+      );
+
+      if (orderedCategories.length === 0) {
+        categoryContentContainer.innerHTML = `
+          <div class="param-category-empty">
+            <i class="fas fa-exclamation-circle" style="font-size: 24px; margin-bottom: 10px; color: #ea4335;"></i>
+            <div>Unable to categorize selected models</div>
+          </div>
+        `;
+        return;
+      }
+
+      let tabsHtml = '';
+      let contentHtml = '';
+
+      orderedCategories.forEach((category, index) => {
+        const isActive = index === 0;
+        const modelsInCategory = modelsByCategory[category.id];
+
+        tabsHtml += `
+          <div class="param-category-tab ${isActive ? 'active' : ''}" 
+               onclick="TrainingSystem.switchParamCategory('${category.id}')">
+            ${category.name} (${modelsInCategory.length})
+          </div>
+        `;
+
+        contentHtml += `
+          <div class="param-category-content ${isActive ? 'active' : ''}" id="param_category_${category.id}">
+            ${this.renderParameterCategory(category.id, modelsInCategory)}
+          </div>
+        `;
+      });
+
+      categoryTabsContainer.innerHTML = tabsHtml;
+      categoryContentContainer.innerHTML = contentHtml;
+
+      this.restoreParameterValues();
+    },
+
+    restoreParameterValues() {
+      this.state.selectedModels.forEach(modelKey => {
+        const category = this.state.modelCategoryMap[modelKey];
+        const taskType = '{{ task_type }}';
+        const isRegression = taskType.includes('regression');
+        let modelTaskType = isRegression ? 'regression' : 'classification';
+
+        if (this.state.isZeroInflated) {
+          if (modelKey.includes('regressor') || modelKey === 'svr' ||
+            modelKey === 'ridge' || modelKey === 'lasso' ||
+            modelKey === 'linear_regression') {
+            modelTaskType = 'regression';
+          } else if (modelKey.includes('classifier') || modelKey === 'svm' ||
+            modelKey === 'logistic_regression') {
+            modelTaskType = 'classification';
+          }
+        }
+
+        const modelConfig = this.state.modelRegistry[category]?.[modelTaskType]?.[modelKey];
+
+        if (modelConfig && modelConfig.params) {
+          Object.entries(modelConfig.params).forEach(([paramName, paramConfig]) => {
+            const paramId = `${modelKey}_${paramName}`;
+            const currentValue = this.state.modelParameters[modelKey]?.[paramName] !== undefined
+              ? this.state.modelParameters[modelKey][paramName]
+              : paramConfig.default;
+
+            if (paramConfig.type === 'bool') {
+              const checkbox = document.getElementById(paramId);
+              if (checkbox) {
+                checkbox.checked = currentValue === true;
+              }
+            } else if (paramConfig.type === 'select') {
+              const select = document.getElementById(paramId);
+              if (select) {
+                select.value = currentValue !== null ? currentValue : 'None';
+              }
+            } else if (paramConfig.type === 'int' || paramConfig.type === 'float') {
+              const slider = document.getElementById(`${paramId}_slider`);
+              const input = document.getElementById(`${paramId}_input`);
+              const valueDisplay = document.getElementById(`${paramId}_value`);
+
+              if (slider && input && valueDisplay) {
+                const displayValue = currentValue !== null ? currentValue : paramConfig.default;
+                slider.value = displayValue;
+                input.value = displayValue;
+
+                if (paramConfig.type === 'int') {
+                  valueDisplay.textContent = Math.round(displayValue);
+                } else {
+                  valueDisplay.textContent = parseFloat(displayValue).toFixed(2);
+                }
+              }
+            } else if (paramConfig.type === 'text') {
+              const input = document.getElementById(paramId);
+              if (input) {
+                input.value = currentValue !== null ? currentValue : '';
+              }
+            }
+          });
+        }
+      });
+    },
+
+    renderParameterCategory(categoryId, modelKeys) {
+      const category = this.state.modelCategories.find(c => c.id === categoryId);
+      const taskType = '{{ task_type }}';
+      const isRegression = taskType.includes('regression');
+
+      let html = `
+        <div class="param-cards-category param-category-${categoryId}">
+          <div class="param-category-title">
+            <i class="${category?.icon || 'fas fa-cog'}"></i>
+            ${category?.name} Parameters
+            <span style="font-size: 12px; font-weight: normal; color: #5f6368; margin-left: 8px;">
+              ${modelKeys.length} model${modelKeys.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          <div class="param-cards-grid">
+      `;
+
+      let hasModelsWithParams = false;
+
+      modelKeys.forEach(modelKey => {
+        const model = this.state.availableModels.find(m => m.key === modelKey);
+        if (!model) {
+          console.warn(`Model not found: ${modelKey}`);
+          return;
+        }
+
+        let modelTaskType = isRegression ? 'regression' : 'classification';
+        if (this.state.isZeroInflated) {
+          if (modelKey.includes('regressor') || modelKey === 'svr' ||
+            modelKey === 'ridge' || modelKey === 'lasso' ||
+            modelKey === 'linear_regression') {
+            modelTaskType = 'regression';
+          } else if (modelKey.includes('classifier') || modelKey === 'svm' ||
+            modelKey === 'logistic_regression') {
+            modelTaskType = 'classification';
+          }
+        }
+
+        const modelConfig = this.state.modelRegistry[categoryId]?.[modelTaskType]?.[modelKey];
+
+        if (!modelConfig) {
+          console.warn(`No config found for ${modelKey} in ${categoryId}.${modelTaskType}`);
+          html += this.renderEmptyModelCard(model);
+          return;
+        }
+
+        if (!modelConfig.params || Object.keys(modelConfig.params).length === 0) {
+          html += this.renderNoParamsModelCard(model, modelTaskType);
+        } else {
+          hasModelsWithParams = true;
+          html += this.renderModelParameterCard(model, modelConfig, modelTaskType);
+        }
+      });
+
+      html += '</div></div>';
+
+      if (!hasModelsWithParams) {
+        html = `
+          <div class="param-cards-category param-category-${categoryId}">
+            <div class="param-category-title">
+              <i class="${category?.icon || 'fas fa-cog'}"></i>
+              ${category?.name} Parameters
+            </div>
+            <div class="param-category-empty">
+              <i class="fas fa-sliders-h" style="font-size: 32px; margin-bottom: 16px; color: #dadce0;"></i>
+              <div>No tunable parameters for selected ${category?.name} models</div>
+            </div>
+          </div>
+        `;
+      }
+
+      return html;
+    },
+
+    renderEmptyModelCard(model) {
+      return `
+        <div class="param-card">
+          <div class="param-card-header">
+            <span>${model.name}</span>
+            <span style="font-size: 11px; color: #ea4335;">
+              <i class="fas fa-info-circle"></i> Config Missing
+            </span>
+          </div>
+          <div class="param-card-body">
+            <div class="text-center text-muted py-3">
+              Configuration not found for this model
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    renderNoParamsModelCard(model, modelTaskType) {
+      return `
+        <div class="param-card">
+          <div class="param-card-header">
+            <span>${model.name}</span>
+            <span style="font-size: 11px; color: #5f6368;">
+              ${this.state.isZeroInflated ?
+          (modelTaskType === 'regression' ? 'Stage 2: Value Prediction' : 'Stage 1: Zero Detection') :
+          (modelTaskType === 'regression' ? 'Regression' : 'Classification')}
+            </span>
+          </div>
+          <div class="param-card-body">
+            <div class="text-center text-muted py-3">
+              <i class="fas fa-cog" style="font-size: 24px; margin-bottom: 8px; color: #dadce0;"></i>
+              <div>This model uses default parameters</div>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    renderModelParameterCard(model, modelConfig, modelTaskType) {
+      return `
+        <div class="param-card">
+          <div class="param-card-header">
+            <span>${model.name}</span>
+            <span style="font-size: 11px; color: #5f6368;">
+              ${this.state.isZeroInflated ?
+          (modelTaskType === 'regression' ? 'Stage 2: Value Prediction' : 'Stage 1: Zero Detection') :
+          (modelTaskType === 'regression' ? 'Regression' : 'Classification')}
+            </span>
+          </div>
+          <div class="param-card-body">
+            ${this.renderModelParameters(model.key, modelConfig.params)}
+          </div>
+        </div>
+      `;
+    },
+
+    renderModelParameters(modelKey, params) {
+      let html = '<div class="param-container">';
+
+      const paramGroups = {
+        "basic": [],
+        "advanced": [],
+        "optimization": [],
+        "regularization": [],
+        "tree_specific": [],
+        "ensemble_specific": []
+      };
+
+      for (const [paramName, paramConfig] of Object.entries(params)) {
+        if (paramName.includes('n_estimators') || paramName.includes('learning_rate') || paramName.includes('subsample') ||
+          paramName.includes('bootstrap') || paramName.includes('oob_score') || paramName.includes('warm_start')) {
+          paramGroups.ensemble_specific.push([paramName, paramConfig]);
+        } else if (paramName.includes('max_depth') || paramName.includes('min_samples') || paramName.includes('max_features') ||
+          paramName.includes('max_leaf') || paramName.includes('min_impurity') || paramName.includes('ccp_alpha')) {
+          paramGroups.tree_specific.push([paramName, paramConfig]);
+        } else if (paramName.includes('C') || paramName.includes('alpha') || paramName.includes('l1_ratio') ||
+          paramName.includes('penalty') || paramName.includes('tol')) {
+          paramGroups.regularization.push([paramName, paramConfig]);
+        } else if (paramName.includes('max_iter') || paramName.includes('solver') || paramName.includes('algorithm') ||
+          paramName.includes('criterion') || paramName.includes('loss') || paramName.includes('validation_fraction')) {
+          paramGroups.optimization.push([paramName, paramConfig]);
+        } else if (paramName.includes('random_state') || paramName.includes('verbose') || paramName.includes('n_jobs') ||
+          paramName.includes('cache_size') || paramName.includes('probability')) {
+          paramGroups.advanced.push([paramName, paramConfig]);
+        } else {
+          paramGroups.basic.push([paramName, paramConfig]);
+        }
+      }
+
+      for (const [groupName, groupParams] of Object.entries(paramGroups)) {
+        if (groupParams.length === 0) continue;
+
+        const groupTitles = {
+          "basic": "Basic Parameters",
+          "advanced": "Advanced Settings",
+          "optimization": "Optimization Parameters",
+          "regularization": "Regularization Parameters",
+          "tree_specific": "Tree-specific Parameters",
+          "ensemble_specific": "Ensemble-specific Parameters"
+        };
+
+        const groupId = `${modelKey}_${groupName}`;
+        const isExpanded = groupName === 'basic';
+
+        html += `
+          <div class="expandable-section">
+            <div class="expandable-header ${isExpanded ? 'active' : ''}" onclick="TrainingSystem.toggleExpandableSection('${groupId}')">
+              <div>
+                <i class="fas fa-chevron-right"></i>
+                <span>${groupTitles[groupName] || groupName}</span>
+              </div>
+              <span style="font-size: 11px; color: #5f6368;">${groupParams.length} parameters</span>
+            </div>
+            <div class="expandable-content ${isExpanded ? 'expanded' : ''}" id="${groupId}">
+              <div class="compact-param-grid">
+        `;
+
+        groupParams.forEach(([paramName, paramConfig]) => {
+          const paramId = `${modelKey}_${paramName}`;
+          const currentValue = this.state.modelParameters[modelKey]?.[paramName] !== undefined
+            ? this.state.modelParameters[modelKey][paramName]
+            : paramConfig.default;
+
+          html += `
+            <div class="compact-param-control">
+              <div class="compact-param-label">
+                ${paramName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                ${paramConfig.description ? `<small>${paramConfig.description}</small>` : ''}
+              </div>
+          `;
+
+          if (paramConfig.type === 'bool') {
+            const isChecked = currentValue === true;
+            html += `
+              <div class="checkbox-control">
+                <input type="checkbox" id="${paramId}" ${isChecked ? 'checked' : ''}
+                       onchange="TrainingSystem.updateParameter('${modelKey}', '${paramName}', this.checked)">
+                <label for="${paramId}">Enabled</label>
+              </div>
+            `;
+
+          } else if (paramConfig.type === 'select') {
+            html += `
+              <select class="select-control" id="${paramId}" 
+                      onchange="TrainingSystem.updateParameter('${modelKey}', '${paramName}', this.value)">
+            `;
+            paramConfig.options.forEach(option => {
+              const displayValue = option === null ? 'None' : option.toString();
+              const isSelected = option === currentValue;
+              html += `<option value="${option}" ${isSelected ? 'selected' : ''}>${displayValue}</option>`;
+            });
+            html += `</select>`;
+
+          } else if (paramConfig.type === 'int' || paramConfig.type === 'float') {
+            const min = paramConfig.min || 0;
+            const max = paramConfig.max || 100;
+            const step = paramConfig.type === 'int' ? 1 : paramConfig.step || 0.01;
+            const defaultValue = currentValue !== undefined ? currentValue : paramConfig.default;
+            const valueDisplay = paramConfig.type === 'int' ?
+              Math.round(defaultValue) : parseFloat(defaultValue).toFixed(2);
+
+            html += `
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                <input type="range" class="param-slider" id="${paramId}_slider" 
+                       min="${min}" max="${max}" step="${step}" value="${defaultValue}"
+                       oninput="TrainingSystem.updateSliderValue('${paramId}', this.value, '${paramConfig.type}')"
+                       style="flex: 1;">
+                <input type="number" id="${paramId}_input" 
+                       min="${min}" max="${max}" step="${step}" value="${defaultValue}"
+                       oninput="TrainingSystem.updateSliderInput('${paramId}', this.value, '${paramConfig.type}')"
+                       style="width: 70px; padding: 4px 6px; font-size: 12px;">
+                <button class="reset-param-btn" onclick="TrainingSystem.resetParam('${modelKey}', '${paramName}', ${paramConfig.default}, '${paramConfig.type}')">
+                  Reset
+                </button>
+              </div>
+              <div style="text-align: center; margin-top: 4px;">
+                <span class="param-value" id="${paramId}_value">${valueDisplay}</span>
+              </div>
+            `;
+
+          } else if (paramConfig.type === 'text') {
+            html += `
+              <input type="text" class="text-control" id="${paramId}" 
+                     value="${currentValue !== null && currentValue !== undefined ? currentValue : ''}"
+                     oninput="TrainingSystem.updateParameter('${modelKey}', '${paramName}', this.value)"
+                     placeholder="Enter value...">
+            `;
+          }
+
+          html += `</div>`;
+        });
+
+        html += `
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      html += '</div>';
+      return html;
+    },
+
+    toggleExpandableSection(sectionId) {
+      const header = document.querySelector(`[onclick*="${sectionId}"]`);
+      const content = document.getElementById(sectionId);
+
+      if (header && content) {
+        header.classList.toggle('active');
+        content.classList.toggle('expanded');
+
+        const icon = header.querySelector('i');
+        if (icon) {
+          if (header.classList.contains('active')) {
+            icon.style.transform = 'rotate(90deg)';
+          } else {
+            icon.style.transform = 'rotate(0deg)';
+          }
+        }
+      }
+    },
+
+    updateSliderValue(paramId, value, type) {
+      const inputElement = document.getElementById(`${paramId}_input`);
+      const valueElement = document.getElementById(`${paramId}_value`);
+
+      if (inputElement) {
+        inputElement.value = value;
+      }
+
+      if (valueElement) {
+        if (type === 'int') {
+          valueElement.textContent = Math.round(value);
+        } else {
+          valueElement.textContent = parseFloat(value).toFixed(2);
+        }
+      }
+
+      const parts = paramId.split('_');
+      const modelKey = parts[0] + '_' + parts[1];
+      const paramName = parts.slice(2).join('_');
+      this.updateParameter(modelKey, paramName, parseFloat(value));
+    },
+
+    updateSliderInput(paramId, value, type) {
+      const sliderElement = document.getElementById(`${paramId}_slider`);
+      const valueElement = document.getElementById(`${paramId}_value`);
+
+      if (sliderElement) {
+        sliderElement.value = value;
+      }
+
+      if (valueElement) {
+        if (type === 'int') {
+          valueElement.textContent = Math.round(value);
+        } else {
+          valueElement.textContent = parseFloat(value).toFixed(2);
+        }
+      }
+
+      const parts = paramId.split('_');
+      const modelKey = parts[0] + '_' + parts[1];
+      const paramName = parts.slice(2).join('_');
+      this.updateParameter(modelKey, paramName, parseFloat(value));
+    },
+
+    resetParam(modelKey, paramName, defaultValue, type) {
+      const paramId = `${modelKey}_${paramName}`;
+      const sliderElement = document.getElementById(`${paramId}_slider`);
+      const inputElement = document.getElementById(`${paramId}_input`);
+      const valueElement = document.getElementById(`${paramId}_value`);
+
+      if (sliderElement) sliderElement.value = defaultValue;
+      if (inputElement) inputElement.value = defaultValue;
+
+      if (valueElement) {
+        if (type === 'int') {
+          valueElement.textContent = Math.round(defaultValue);
+        } else {
+          valueElement.textContent = parseFloat(defaultValue).toFixed(2);
+        }
+      }
+
+      this.updateParameter(modelKey, paramName, defaultValue);
+    },
+
+    updateParameter(modelKey, paramName, value) {
+      if (!this.state.modelParameters) {
+        this.state.modelParameters = {};
+      }
+      if (!this.state.modelParameters[modelKey]) {
+        this.state.modelParameters[modelKey] = {};
+      }
+
+      let processedValue = value;
+
+      if (typeof value === 'string') {
+        if (!isNaN(value) && value.trim() !== '') {
+          if (value.includes('.')) {
+            processedValue = parseFloat(value);
+          } else {
+            processedValue = parseInt(value, 10);
+          }
+        }
+        else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
+          processedValue = value.toLowerCase() === 'true';
+        }
+        else if (value.toLowerCase() === 'null' || value.toLowerCase() === 'none' || value === '') {
+          processedValue = null;
+        }
+      } else if (value === '') {
+        processedValue = null;
+      }
+
+      this.state.modelParameters[modelKey][paramName] = processedValue;
+    },
+
+    switchParamCategory(categoryId) {
+      this.collectAllParameters();
+
+      document.querySelectorAll('.param-category-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.param-category-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      const tab = document.querySelector(`.param-category-tab[onclick*="${categoryId}"]`);
+      const content = document.getElementById(`param_category_${categoryId}`);
+
+      if (tab) tab.classList.add('active');
+      if (content) content.classList.add('active');
+
+      setTimeout(() => {
+        this.restoreParameterValues();
+      }, 50);
+    },
+
+    collectAllParameters() {
+      this.state.selectedModels.forEach(modelKey => {
+        const category = this.state.modelCategoryMap[modelKey];
+        const taskType = '{{ task_type }}';
+        const isRegression = taskType.includes('regression');
+        let modelTaskType = isRegression ? 'regression' : 'classification';
+
+        if (this.state.isZeroInflated) {
+          if (modelKey.includes('regressor') || modelKey === 'svr' ||
+            modelKey === 'ridge' || modelKey === 'lasso' ||
+            modelKey === 'linear_regression') {
+            modelTaskType = 'regression';
+          } else if (modelKey.includes('classifier') || modelKey === 'svm' ||
+            modelKey === 'logistic_regression') {
+            modelTaskType = 'classification';
+          }
+        }
+
+        const modelConfig = this.state.modelRegistry[category]?.[modelTaskType]?.[modelKey];
+
+        if (modelConfig && modelConfig.params) {
+          Object.entries(modelConfig.params).forEach(([paramName, paramConfig]) => {
+            const paramId = `${modelKey}_${paramName}`;
+
+            if (paramConfig.type === 'bool') {
+              const checkbox = document.getElementById(paramId);
+              if (checkbox) {
+                this.updateParameter(modelKey, paramName, checkbox.checked);
+              }
+            } else if (paramConfig.type === 'select') {
+              const select = document.getElementById(paramId);
+              if (select) {
+                this.updateParameter(modelKey, paramName, select.value);
+              }
+            } else if (paramConfig.type === 'int' || paramConfig.type === 'float') {
+              const input = document.getElementById(`${paramId}_input`);
+              if (input) {
+                this.updateParameter(modelKey, paramName, parseFloat(input.value));
+              }
+            } else if (paramConfig.type === 'text') {
+              const input = document.getElementById(paramId);
+              if (input) {
+                this.updateParameter(modelKey, paramName, input.value);
+              }
+            }
+          });
+        }
+      });
+    },
+
+    sortModelsIntoStages() {
+      this.state.stageModels.classification = [];
+      this.state.stageModels.regression = [];
+
+      this.state.selectedModels.forEach(modelKey => {
+        if (modelKey.includes('classifier') || modelKey === 'svm' || modelKey === 'logistic_regression') {
+          this.state.stageModels.classification.push(modelKey);
+        } else if (modelKey.includes('regressor') || modelKey === 'svr' ||
+          modelKey === 'ridge' || modelKey === 'lasso' ||
+          modelKey === 'linear_regression') {
+          this.state.stageModels.regression.push(modelKey);
+        } else {
+          this.state.stageModels.classification.push(modelKey);
+        }
+      });
+
+      this.state.stageProgress.classification.total = this.state.stageModels.classification.length;
+      this.state.stageProgress.regression.total = this.state.stageModels.regression.length;
+    },
+
+    async startTraining() {
+      try {
+        const modelMode =
+          document.querySelector('input[name="model_mode"]:checked')?.value || 'auto';
+        const tuningMode =
+          document.querySelector('input[name="tuning_mode"]:checked')?.value || 'auto';
+
+        if (modelMode === 'manual' && this.state.selectedModels.length === 0) {
+          alert('Please select at least one model');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('model_mode', modelMode);
+        formData.append('tuning_mode', tuningMode);
+
+        this.state.selectedModels.forEach(model => {
+          formData.append('models[]', model);
+        });
+
+        for (const [modelKey, params] of Object.entries(this.state.modelParameters)) {
+          for (const [paramName, paramValue] of Object.entries(params)) {
+            if (
+              paramValue === null ||
+              paramValue === undefined ||
+              paramValue === '' ||
+              paramValue === 'None'
+            ) {
+              continue;
+            }
+
+            const key = `${modelKey}__model__${paramName}`;
+
+            if (typeof paramValue === 'boolean') {
+              formData.append(key, paramValue ? 'true' : 'false');
+            } else if (typeof paramValue === 'number') {
+              formData.append(key, String(paramValue));
+            } else {
+              formData.append(key, paramValue);
+            }
+          }
+        }
+
+        document.getElementById('startTrainingBtn').disabled = true;
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('progressContainer').style.display = 'block';
+
+        this.addLog('info', `Starting training with ${this.state.selectedModels.length} model(s)`);
+
+        const response = await fetch('/train_model', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.started) {
+          throw new Error(result.error || 'Training failed to start');
+        }
+
+        this.addLog('success', 'Training started successfully');
+        this.startRealProgressMonitoring();
+
+      } catch (err) {
+        console.error('Training start error:', err);
+        this.addLog('error', err.message || 'Failed to start training');
+        document.getElementById('startTrainingBtn').disabled = false;
+      }
+    },
+
+    initializeProgressUI() {
+      if (this.state.isZeroInflated) {
+        this.updateStageUI('classification');
+        this.addLog('info', 'Starting Stage 1: Zero Detection');
+      } else {
+        document.getElementById('currentStageBadge').textContent = 'Model Training';
+        document.getElementById('currentStageBadge').className = 'stage-badge stage-1-badge';
+        document.getElementById('stageStatus').innerHTML = '<span class="spinner"></span><span>Starting model training...</span>';
+      }
+
+      this.state.startTime = Date.now();
+    },
+
+    updateStageUI(stage) {
+      this.state.currentStage = stage;
+
+      const stageTitle = stage === 'classification' ? 'Stage 1: Zero Detection' : 'Stage 2: Value Prediction';
+      const stageDescription = stage === 'classification' ?
+        'Training models to detect zero values' : 'Training models to predict non-zero values';
+
+      const badgeElement = document.getElementById('currentStageBadge');
+      badgeElement.textContent = stageTitle;
+      badgeElement.className = stage === 'classification' ?
+        'stage-badge stage-1-badge' : 'stage-badge stage-2-badge';
+
+      document.getElementById('stageStatus').innerHTML = `<span class="spinner"></span><span>${stageDescription}</span>`;
+
+      if (stage === 'classification' && this.state.isZeroInflated) {
+        document.getElementById('nextStageText').textContent = 'Stage 2: Value Prediction';
+        document.getElementById('nextStageInfo').style.display = 'block';
+      } else if (stage === 'regression') {
+        document.getElementById('nextStageInfo').style.display = 'none';
+      }
+    },
+
+    startRealProgressMonitoring() {
+      if (this.state.progressInterval) {
+        clearInterval(this.state.progressInterval);
+      }
+
+      this.state.startTime = Date.now();
+
+      this.state.progressInterval = setInterval(async () => {
+        try {
+          const response = await fetch('/api/training_status');
+          if (response.ok) {
+            const status = await response.json();
+            this.updateRealProgress(status);
+
+            if (status.done && !status.running) {
+              this.completeTraining();
+            } else if (status.error) {
+              this.addLog('error', `Training failed: ${status.error}`);
+              this.resetTraining();
+            }
+          } else {
+            console.error('Failed to fetch training status');
+          }
+        } catch (error) {
+          console.error('Error fetching training status:', error);
+        }
+      }, 1500);
+    },
+
+    updateRealProgress(status) {
+      const now = Date.now();
+      const elapsedSeconds = Math.floor((now - (this.state.startTime || now)) / 1000);
+
+      // Update model information with 5-second minimum display
+      this.updateCurrentModelInfo(status);
+
+      // Update training statistics
+      this.updateTrainingStats(status, elapsedSeconds);
+
+      // Update status message
+      this.updateStatusMessage(status);
+
+      // Update UI status indicator
+      this.updateStatusIndicator(status);
+    },
+
+    updateCurrentModelInfo(status) {
+      if (!status.current_model) return;
+
+      const isAuto = this.isAutoMode();
+
+      // AUTO MODE
+      if (isAuto && !status.current_model) {
+        document.getElementById('currentModelName').textContent = 'Selecting best models automatically…';
+        document.getElementById('currentModelStatus').textContent = 'AutoML is analyzing data and choosing models';
+        document.getElementById('currentModelStage').textContent = 'Auto Mode';
+        document.getElementById('currentModelType').textContent = '-';
+        return;
+      }
+
+      const tracker = this.state.modelDisplayTracker;
+      const now = Date.now();
+      const incomingModel = status.current_model;
+
+      // First model
+      if (tracker.lastModel === null) {
+        tracker.lastModel = incomingModel;
+        tracker.modelStartTime = now;
+        this.renderModelUI(status);
+        return;
+      }
+
+      // Same model → normal update
+      if (tracker.lastModel === incomingModel) {
+        this.renderModelUI(status);
+        return;
+      }
+
+      // Model changed → enforce 5s visibility
+      const elapsed = now - tracker.modelStartTime;
+
+      if (elapsed < tracker.minDuration) {
+        // Don't update yet, wait for minimum display time
+        setTimeout(() => {
+          tracker.lastModel = incomingModel;
+          tracker.modelStartTime = Date.now();
+          this.renderModelUI(status);
+        }, tracker.minDuration - elapsed);
+      } else {
+        tracker.lastModel = incomingModel;
+        tracker.modelStartTime = now;
+        this.renderModelUI(status);
+      }
+    },
+
+    renderModelUI(status) {
+      const modelName = this.getModelDisplayName(status.current_model);
+      const modelStage = this.state.isZeroInflated
+        ? (this.state.currentStage === 'classification'
+          ? 'Stage 1: Zero Detection'
+          : 'Stage 2: Value Prediction')
+        : 'Model Training';
+
+      const modelType = this.getModelType(status.current_model);
+
+      // Update all UI elements
+      document.getElementById('currentModelName').textContent = modelName || 'Preparing model...';
+
+      if (status.model_index !== undefined && status.total_models !== undefined) {
+        document.getElementById('modelProgress').textContent = `Model ${status.model_index + 1} of ${status.total_models}`;
+      } else if (status.completed_models !== undefined && status.total_models !== undefined) {
+        document.getElementById('modelProgress').textContent = `Model ${status.completed_models + 1} of ${status.total_models}`;
+      } else {
+        document.getElementById('modelProgress').textContent = 'Auto-selected models';
+      }
+
+      document.getElementById('currentModelStatus').textContent = status.message || `Training ${modelName}...`;
+      document.getElementById('currentModelStage').textContent = modelStage;
+      document.getElementById('currentModelType').textContent = modelType;
+
+      const spinner = document.querySelector('#currentModelInfo .spinner');
+      if (spinner) spinner.style.display = status.running ? 'inline-block' : 'none';
+    },
+
+    getModelType(modelKey) {
+      if (!modelKey) return '-';
+
+      if (modelKey.includes('regressor') || modelKey === 'svr' || modelKey === 'ridge' ||
+        modelKey === 'lasso' || modelKey === 'linear_regression') {
+        return 'Regression';
+      } else if (modelKey.includes('classifier') || modelKey === 'svm' || modelKey === 'logistic_regression') {
+        return 'Classification';
+      } else if (this.state.isZeroInflated) {
+        if (modelKey.includes('regressor') || modelKey === 'svr' || modelKey === 'ridge' ||
+          modelKey === 'lasso' || modelKey === 'linear_regression') {
+          return 'Regression (Value Prediction)';
+        } else if (modelKey.includes('classifier') || modelKey === 'svm' || modelKey === 'logistic_regression') {
+          return 'Classification (Zero Detection)';
+        }
+      }
+
+      return 'Model';
+    },
+
+    updateTrainingStats(status, elapsedSeconds) {
+      // Update completed models count
+      const completedModels = document.getElementById('completedModels');
+      if (completedModels) {
+        let totalCompleted = 0;
+
+        if (this.state.isZeroInflated) {
+          totalCompleted = (this.state.stageProgress.classification.completed || 0) +
+            (this.state.stageProgress.regression.completed || 0);
+        } else if (status.completed_models !== undefined) {
+          totalCompleted = status.completed_models;
+        } else if (status.model_index !== undefined) {
+          totalCompleted = status.model_index;
+        }
+
+        completedModels.textContent = totalCompleted;
+      }
+
+      // Update remaining models count
+      const remainingModels = document.getElementById('remainingModels');
+      if (remainingModels) {
+        let totalRemaining = 0;
+        if (this.state.isZeroInflated) {
+          const classRemaining = Math.max(0,
+            (this.state.stageProgress.classification.total || 0) -
+            (this.state.stageProgress.classification.completed || 0)
+          );
+          const regRemaining = Math.max(0,
+            (this.state.stageProgress.regression.total || 0) -
+            (this.state.stageProgress.regression.completed || 0)
+          );
+          totalRemaining = classRemaining + regRemaining;
+        } else if (status.models_remaining !== undefined && status.models_remaining > 0) {
+          totalRemaining = status.models_remaining;
+        } else if (status.total_models !== undefined && status.total_models > 0 && status.model_index !== undefined) {
+          totalRemaining = Math.max(0, status.total_models - status.model_index);
+        } else if (this.state.selectedModels && this.state.selectedModels.length > 0) {
+          totalRemaining = Math.max(0, this.state.selectedModels.length - (status.model_index || 0));
+        }
+        remainingModels.textContent = totalRemaining;
+      }
+
+      // Update elapsed time
+      const totalTime = document.getElementById('totalTime');
+      if (totalTime) {
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = elapsedSeconds % 60;
+
+        if (minutes > 0) {
+          totalTime.textContent = `${minutes}m ${seconds}s`;
+        } else {
+          totalTime.textContent = `${seconds}s`;
+        }
+      }
+
+      // Update current model time
+      const currentModelTime = document.getElementById('currentModelTime');
+      if (currentModelTime) {
+        const tracker = this.state.modelDisplayTracker;
+        const modelElapsed = Math.floor((Date.now() - tracker.modelStartTime) / 1000);
+
+        if (modelElapsed < 60) {
+          currentModelTime.textContent = `${modelElapsed}s`;
+        } else {
+          const modelMinutes = Math.floor(modelElapsed / 60);
+          const modelSeconds = modelElapsed % 60;
+          currentModelTime.textContent = `${modelMinutes}m ${modelSeconds}s`;
+        }
+      }
+    },
+
+    updateStatusMessage(status) {
+      const statusMessage = document.getElementById('statusMessage');
+      const statusText = document.getElementById('statusMessageText');
+
+      if (status.error) {
+        statusMessage.style.display = 'block';
+        statusMessage.style.background = '#fce8e6';
+        statusMessage.style.borderLeftColor = '#ea4335';
+        statusText.textContent = `Error: ${status.error}`;
+      } else if (status.done) {
+        statusMessage.style.display = 'block';
+        statusMessage.style.background = '#e6f4ea';
+        statusMessage.style.borderLeftColor = '#34a853';
+        statusText.textContent = 'Training completed successfully!';
+      } else if (status.running) {
+        statusMessage.style.display = 'block';
+        statusMessage.style.background = '#e8f0fe';
+        statusMessage.style.borderLeftColor = '#1a73e8';
+        statusText.textContent = 'Training in progress...';
+      } else {
+        statusMessage.style.display = 'none';
+      }
+    },
+
+    updateStatusIndicator(status) {
+      const trainingStatus = document.getElementById('trainingStatus');
+
+      if (status.error) {
+        trainingStatus.textContent = 'Error';
+        trainingStatus.style.color = '#ea4335';
+      } else if (status.done) {
+        trainingStatus.textContent = 'Completed';
+        trainingStatus.style.color = '#34a853';
+      } else if (status.running) {
+        trainingStatus.textContent = 'Running';
+        trainingStatus.style.color = '#1a73e8';
+      } else {
+        trainingStatus.textContent = 'Idle';
+        trainingStatus.style.color = '#5f6368';
+      }
+    },
+
+    getModelDisplayName(modelKey) {
+      if (!modelKey) return 'Unknown Model';
+
+      const model = this.state.availableModels.find(m => m.key === modelKey);
+      if (model) return model.name;
+
+      const str = String(modelKey);
+      return str
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase());
+    },
+
+    completeTraining() {
+      if (this.state.progressInterval) {
+        clearInterval(this.state.progressInterval);
+        this.state.progressInterval = null;
+      }
+
+      this.state.isTraining = false;
+
+      this.updateStatusIndicator({ done: true, running: false });
+
+      document.getElementById('currentModelStatus').textContent = 'Training completed successfully!';
+      document.getElementById('currentModelStatus').style.color = '#34a853';
+
+      const spinner = document.querySelector('#currentModelInfo .spinner');
+      if (spinner) spinner.style.display = 'none';
+
+      const modelInfo = document.getElementById('currentModelInfo');
+      const checkmark = document.createElement('i');
+      checkmark.className = 'fas fa-check-circle';
+      checkmark.style.color = '#34a853';
+      checkmark.style.marginRight = '10px';
+
+      const spinnerElement = modelInfo.querySelector('.spinner');
+      if (spinnerElement) {
+        spinnerElement.replaceWith(checkmark);
+      }
+
+      document.getElementById('startTrainingBtn').style.display = 'none';
+      document.getElementById('resetButtonContainer').style.display = 'block';
+      document.getElementById('resultsButtonContainer').style.display = 'block';
+
+      this.addLog('success', 'Training completed successfully!');
+    },
+
+    resetTraining() {
+      if (this.state.progressInterval) {
+        clearInterval(this.state.progressInterval);
+        this.state.progressInterval = null;
+      }
+
+      this.state.isTraining = false;
+      this.state.currentStage = 'classification';
+      this.state.stageModels = { classification: [], regression: [] };
+      this.state.stageProgress = {
+        classification: { completed: 0, total: 0 },
+        regression: { completed: 0, total: 0 }
+      };
+
+      document.getElementById('emptyState').style.display = 'block';
+      document.getElementById('progressContainer').style.display = 'none';
+      document.getElementById('startTrainingBtn').style.display = 'block';
+      document.getElementById('startTrainingBtn').disabled = false;
+      document.getElementById('resetButtonContainer').style.display = 'none';
+      document.getElementById('resultsButtonContainer').style.display = 'none';
+
+      this.addLog('info', 'Training reset');
+    },
+
+    addLog(type, message) {
+      const logContainer = document.getElementById('trainingLog');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.innerHTML = `
+        <span class="log-time">${time}</span>
+        <span class="log-message">${message}</span>
+      `;
+
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    },
+
+    clearLog() {
+      const logContainer = document.getElementById('trainingLog');
+      logContainer.innerHTML = `
+        <div class="log-entry">
+          <span class="log-time">{{ now().strftime('%H:%M:%S') }}</span>
+          <span class="log-message">Log cleared</span>
+        </div>
+      `;
+    },
+
+    checkExistingTraining() {
+      fetch('/api/training_status')
+        .then(response => response.json())
+        .then(status => {
+          if (status.running) {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('startTrainingBtn').disabled = true;
+
+            this.startRealProgressMonitoring();
+            this.updateRealProgress(status);
+
+            this.state.isTraining = true;
+            this.addLog('info', 'Resumed existing training session');
+          }
+        })
+        .catch(error => {
+          console.error('Error checking training status:', error);
+        });
+    },
+
+    setupTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.getAttribute('data-tab');
+
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          document.getElementById(`${tabName}Tab`).classList.add('active');
+        });
+      });
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    TrainingSystem.init();
+  });
+</script>
+{% endblock %}

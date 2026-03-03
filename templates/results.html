@@ -1,0 +1,477 @@
+{% extends "base.html" %}
+{% block title %}Results · AutoML v1.0{% endblock %}
+{% block page_title %}Training Results{% endblock %}
+{% block head %}
+<style>
+  .r-hero {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #059669 100%);
+    border-radius: 14px;
+    padding: 30px 34px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px
+  }
+
+  .r-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, .06);
+    border-radius: 50%
+  }
+
+  .r-hc {
+    position: relative;
+    z-index: 1
+  }
+
+  .dl-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    background: #fff;
+    transition: all .22s;
+    height: 100%
+  }
+
+  .dl-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md)
+  }
+
+  .dl-card.csv {
+    border-top: 3px solid var(--s)
+  }
+
+  .dl-card.json {
+    border-top: 3px solid var(--p)
+  }
+
+  .dl-card.pkl {
+    border-top: 3px solid var(--d)
+  }
+
+  .dl-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin: 0 auto 12px
+  }
+
+  .mrow {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: #fff;
+    transition: all .2s;
+    position: relative;
+    display: grid;
+    align-items: center;
+    gap: 10px
+  }
+
+  .mrow:hover {
+    border-color: var(--p);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, .1);
+    transform: translateY(-1px)
+  }
+
+  .mrow.best {
+    border-color: var(--p);
+    border-width: 2px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, .03), rgba(5, 150, 105, .02))
+  }
+
+  .best-tag {
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    background: var(--p);
+    color: #fff;
+    font-size: .64rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px
+  }
+
+  .mbox {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center
+  }
+
+  .mval {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+    font-family: 'DM Mono', monospace
+  }
+
+  .mlbl {
+    font-size: .66rem;
+    color: var(--text3);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: .04em
+  }
+
+  .comp-card {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    border-radius: 14px;
+    padding: 26px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 20px
+  }
+
+  .comp-val {
+    font-size: 3.2rem;
+    font-weight: 900;
+    font-family: 'DM Mono', monospace;
+    line-height: 1
+  }
+
+  .stage-wrap {
+    border-radius: 12px;
+    border: 2px solid;
+    overflow: hidden;
+    margin-bottom: 20px
+  }
+
+  .sw-1 {
+    border-color: var(--p)
+  }
+
+  .sw-2 {
+    border-color: var(--s)
+  }
+
+  .s-head {
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: .88rem
+  }
+
+  .sw-1 .s-head {
+    background: rgba(37, 99, 235, .07);
+    color: var(--p)
+  }
+
+  .sw-2 .s-head {
+    background: rgba(5, 150, 105, .07);
+    color: #059669
+  }
+
+  .next-btn {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-decoration: none;
+    background: #fff;
+    transition: all .2s
+  }
+
+  .next-btn:hover {
+    border-color: var(--p);
+    background: var(--pl);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow)
+  }
+</style>
+{% endblock %}
+{% block content %}
+<!-- HERO -->
+<div class="r-hero">
+  <div class="r-hc">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px">
+      <div>
+        <div
+          style="font-size:.76rem;font-weight:600;opacity:.75;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">
+          Training Complete</div>
+        <h1 style="font-size:1.7rem;font-weight:800;margin-bottom:6px;letter-spacing:-.02em">🏆 Results Ready</h1>
+        <p style="opacity:.85;font-size:.88rem">{{
+          task_type.replace('_','
+          ')|title }}</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="/model_training" class="btn"
+          style="background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35)"><i
+            class="fas fa-redo"></i> Re-Train</a>
+        <a href="/" class="btn" style="background:#fff;color:#2563eb;font-weight:700"><i class="fas fa-plus"></i> New
+          Analysis</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+  <div class="sc">
+    <div class="sc-val">{{ selected_features|length if selected_features else 0 }}</div>
+    <div class="sc-lbl">Features Used</div>
+  </div>
+  <div class="sc">
+    <div
+      style="font-size:.85rem;font-weight:700;color:var(--p);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+      {{ task_type.replace('_',' ')|title }}</div>
+    <div class="sc-lbl">Task Type</div>
+  </div>
+  {% if results and results.training_time %}<div class="sc">
+    <div class="sc-val">{{ "%.1f"|format(results.training_time) }}s</div>
+    <div class="sc-lbl">Training Time</div>
+  </div>{% endif %}
+</div>
+
+<!-- DOWNLOADS -->
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title"><i class="fas fa-download"></i> Export Results</h2><span
+      style="font-size:.76rem;color:var(--text3)">All artifacts available after training</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px">
+    <div class="dl-card csv">
+      <div class="dl-icon" style="background:var(--sl);color:var(--s)"><i class="fas fa-file-csv"></i></div>
+      <h5 style="font-weight:700;font-size:.87rem;margin-bottom:5px">Processed Data</h5>
+      <p style="font-size:.76rem;color:var(--text3);margin-bottom:12px">Feature-engineered dataset</p>
+      {% if processed_data_available %}<a href="{{ url_for('download_processed_data') }}" class="btn btn-dl btn-sm"
+        style="width:100%;justify-content:center"><i class="fas fa-download"></i> Download CSV</a>{% else %}<button
+        class="btn btn-sec btn-sm" disabled style="width:100%">Not Available</button>{% endif %}
+    </div>
+    <div class="dl-card json">
+      <div class="dl-icon" style="background:var(--pl);color:var(--p)"><i class="fas fa-file-code"></i></div>
+      <h5 style="font-weight:700;font-size:.87rem;margin-bottom:5px">Full Report</h5>
+      <p style="font-size:.76rem;color:var(--text3);margin-bottom:12px">Complete training summary as JSON</p>
+      {% if report_available %}<a href="{{ url_for('download_report') }}" class="btn btn-pri btn-sm"
+        style="width:100%;justify-content:center"><i class="fas fa-download"></i> Download JSON</a>{% else %}<button
+        class="btn btn-sec btn-sm" disabled style="width:100%">Not Available</button>{% endif %}
+    </div>
+    <div class="dl-card pkl">
+      <div class="dl-icon" style="background:var(--dl);color:var(--d)"><i class="fas fa-robot"></i></div>
+      <h5 style="font-weight:700;font-size:.87rem;margin-bottom:5px">Best Model</h5>
+      <p style="font-size:.76rem;color:var(--text3);margin-bottom:12px">Serialized scikit-learn pipeline</p>
+      {% if model_available %}<a href="{{ url_for('download_model') }}" class="btn btn-dan btn-sm"
+        style="width:100%;justify-content:center"><i class="fas fa-download"></i> Download .pkl</a>{% else %}<button
+        class="btn btn-sec btn-sm" disabled style="width:100%">Not Available</button>{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ZERO INFLATED -->
+{% if is_zero_inflated and zero_inflated_display %}
+<div class="comp-card">
+  <div
+    style="font-size:.72rem;font-weight:700;opacity:.72;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">
+    Composite Score</div>
+  <div class="comp-val">{{ zero_inflated_display.summary.composite_score if zero_inflated_display.summary else '—' }}
+  </div>
+  <div style="opacity:.8;margin-top:8px;font-size:.84rem">Weighted: Stage 1 Acc × zero_ratio + Stage 2 R² ×
+    (1−zero_ratio)</div>
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+    <span style="background:rgba(255,255,255,.18);padding:3px 12px;border-radius:20px;font-size:.76rem">Zero Ratio: {{
+      zero_inflated_display.summary.zero_ratio if zero_inflated_display.summary else '—' }}</span>
+    <span style="background:rgba(255,255,255,.18);padding:3px 12px;border-radius:20px;font-size:.76rem">Non-zero: {{
+      zero_inflated_display.summary.non_zero_samples if zero_inflated_display.summary else '—' }}</span>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+  <div class="stage-wrap sw-1">
+    <div class="s-head"><i class="fas fa-search" style="margin-right:6px"></i>Stage 1: Zero Detection</div>
+    <div style="padding:16px">
+      <div style="text-align:center;padding:14px 0;margin-bottom:14px;background:rgba(37,99,235,.06);border-radius:9px">
+        <div style="font-size:1.9rem;font-weight:900;color:var(--p);font-family:'DM Mono',monospace">{% if
+          zero_inflated_display.stage1.metric_value is defined %}{% if zero_inflated_display.stage1.metric_value is
+          string %}{{ zero_inflated_display.stage1.metric_value }}{% else %}{{
+          "%.1f"|format(zero_inflated_display.stage1.metric_value*100) }}%{% endif %}{% else %}—{% endif %}</div>
+        <div style="font-size:.74rem;color:var(--text3);margin-top:3px">Accuracy</div>
+        {% if zero_inflated_display.stage1.best_model %}<div style="margin-top:7px"><span class="badge b-pri"><i
+              class="fas fa-crown"></i> {{ zero_inflated_display.stage1.best_model }}</span></div>{% endif %}
+      </div>
+      {% if zero_inflated_display.stage1.models and zero_inflated_display.stage1.models|length>0 %}
+      <div class="tbl-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Accuracy</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in zero_inflated_display.stage1.models %}<tr {% if m.name==zero_inflated_display.stage1.best_model
+              %}style="background:var(--pl)" {% endif %}>
+              <td
+                style="font-weight:{% if m.name==zero_inflated_display.stage1.best_model %}700{% else %}400{% endif %}">
+                {{ m.name }}</td>
+              <td style="font-family:'DM Mono',monospace">{{ m.accuracy }}</td>
+              <td style="color:var(--text3);font-family:'DM Mono',monospace">{{ m.time }}</td>
+            </tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="stage-wrap sw-2">
+    <div class="s-head"><i class="fas fa-chart-line" style="margin-right:6px"></i>Stage 2: Value Prediction</div>
+    <div style="padding:16px">
+      <div style="text-align:center;padding:14px 0;margin-bottom:14px;background:rgba(5,150,105,.06);border-radius:9px">
+        <div style="font-size:1.9rem;font-weight:900;color:#059669;font-family:'DM Mono',monospace">{% if
+          zero_inflated_display.stage2.metric_value is defined %}{% if zero_inflated_display.stage2.metric_value is
+          string %}{{ zero_inflated_display.stage2.metric_value }}{% else %}{{
+          "%.3f"|format(zero_inflated_display.stage2.metric_value) }}{% endif %}{% else %}—{% endif %}</div>
+        <div style="font-size:.74rem;color:var(--text3);margin-top:3px">R² Score</div>
+        {% if zero_inflated_display.stage2.best_model %}<div style="margin-top:7px"><span class="badge b-suc"><i
+              class="fas fa-crown"></i> {{ zero_inflated_display.stage2.best_model }}</span></div>{% endif %}
+      </div>
+      {% if zero_inflated_display.stage2.models and zero_inflated_display.stage2.models|length>0 %}
+      <div class="tbl-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>R²</th>
+              <th>RMSE</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in zero_inflated_display.stage2.models %}<tr {% if m.name==zero_inflated_display.stage2.best_model
+              %}style="background:var(--sl)" {% endif %}>
+              <td
+                style="font-weight:{% if m.name==zero_inflated_display.stage2.best_model %}700{% else %}400{% endif %}">
+                {{ m.name }}</td>
+              <td style="font-family:'DM Mono',monospace">{{ m.r2 }}</td>
+              <td style="font-family:'DM Mono',monospace">{{ m.rmse }}</td>
+              <td style="color:var(--text3);font-family:'DM Mono',monospace">{{ m.time }}</td>
+            </tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- REGULAR COMPARISON -->
+{% if not is_zero_inflated and model_comparison and model_comparison|length>0 %}
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title"><i class="fas fa-trophy"></i> Model Comparison</h2><span class="badge b-pri">{{
+      model_comparison|length }} models</span>
+  </div>
+  {% if best_model_name %}
+  <div
+    style="background:linear-gradient(135deg,var(--pl),rgba(5,150,105,.05));border:1.5px solid var(--p);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:1.4rem">🏆</span>
+    <div>
+      <div style="font-weight:700;font-size:.92rem">Best Model: {{ best_model_name }}</div>
+      <div style="font-size:.78rem;color:var(--text2);margin-top:2px">Highest {% if task_type=='regression' %}R² score{%
+        else %}accuracy{% endif %} · {% if best_model_metrics %}{% if task_type=='regression' %}R² = {{
+        best_model_metrics.get('r2','—') }}{% else %}Acc = {{ best_model_metrics.get('accuracy','—') }}{% endif %}{%
+        endif %}</div>
+    </div>
+  </div>
+  {% endif %}
+  <div style="display:flex;flex-direction:column;gap:10px">
+    {% for model in model_comparison %}
+    <div class="mrow {% if model.is_best %}best{% endif %}"
+      style="grid-template-columns:1fr {% if task_type=='regression' %}repeat(3,88px){% else %}repeat(4,82px){% endif %} 82px 70px">
+      {% if model.is_best %}<div class="best-tag">👑 Best</div>{% endif %}
+      <div style="display:flex;align-items:center;gap:9px">
+        <div
+          style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;{% if model.is_best %}background:var(--pl);color:var(--p){% else %}background:var(--bg);color:var(--text3){% endif %}">
+          {% if 'forest' in model.key %}<i class="fas fa-tree"></i>{% elif 'gradient' in model.key or 'boost' in
+          model.key %}<i class="fas fa-bolt"></i>{% elif 'linear' in model.key or 'logistic' in model.key or 'ridge' in
+          model.key or 'lasso' in model.key %}<i class="fas fa-chart-bar"></i>{% elif 'knn' in model.key %}<i
+            class="fas fa-project-diagram"></i>{% elif 'svm' in model.key or 'svr' in model.key %}<i
+            class="fas fa-vector-square"></i>{% else %}<i class="fas fa-cog"></i>{% endif %}
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:.87rem">{{ model.name }}</div>
+          <div style="font-size:.72rem;color:var(--text3);font-family:'DM Mono',monospace">{{ model.key }}</div>
+        </div>
+      </div>
+      {% if task_type=='regression' %}
+      <div class="mbox">
+        <div class="mval" style="color:var(--p)">{{ model.metrics.r2 }}</div>
+        <div class="mlbl">R²</div>
+      </div>
+      <div class="mbox">
+        <div class="mval">{{ model.metrics.rmse }}</div>
+        <div class="mlbl">RMSE</div>
+      </div>
+      <div class="mbox">
+        <div class="mval">{{ model.metrics.mae }}</div>
+        <div class="mlbl">MAE</div>
+      </div>
+      {% else %}
+      <div class="mbox">
+        <div class="mval" style="color:var(--p)">{{ model.metrics.accuracy }}</div>
+        <div class="mlbl">Accuracy</div>
+      </div>
+      <div class="mbox">
+        <div class="mval">{{ model.metrics.precision }}</div>
+        <div class="mlbl">Precision</div>
+      </div>
+      <div class="mbox">
+        <div class="mval">{{ model.metrics.recall }}</div>
+        <div class="mlbl">Recall</div>
+      </div>
+      <div class="mbox">
+        <div class="mval">{{ model.metrics.f1 }}</div>
+        <div class="mlbl">F1</div>
+      </div>
+      {% endif %}
+      <div class="mbox">
+        <div class="mval" style="font-size:.82rem">{{ model.training_time }}</div>
+        <div class="mlbl">Time</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center">{% if model.is_best %}<span
+          class="badge b-pri">Best</span>{% else %}<span class="badge b-neu">Trained</span>{% endif %}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if feature_importance_img %}
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title"><i class="fas fa-star"></i> Feature Importance</h2>
+  </div>
+  <div style="text-align:center"><img src="data:image/png;base64,{{ feature_importance_img }}"
+      style="max-width:100%;border-radius:9px;max-height:380px"></div>
+</div>
+{% endif %}
+
+<!-- NEXT STEPS -->
+<div class="card" style="margin-bottom:0">
+  <div class="card-head">
+    <h2 class="card-title"><i class="fas fa-sync-alt"></i> What's Next?</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px">
+    {% for url,emoji,title,desc in [('/model_training','🔁','Re-train Models','Try different models or
+    hyperparameters'),('/feature_selection','🔧','Change Features','Go back and adjust feature
+    selection'),('/target','🎯','New Target','Try predicting a different column'),('/upload','📂','New Dataset','Start a
+    completely fresh analysis')] %}
+    <a href="{{ url }}" class="next-btn">
+      <div style="font-size:1.3rem;margin-bottom:8px">{{ emoji }}</div>
+      <div style="font-weight:700;font-size:.86rem;color:var(--text);margin-bottom:3px">{{ title }}</div>
+      <div style="font-size:.76rem;color:var(--text3)">{{ desc }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Data Overview · AutoML v1.0{% endblock %}
+{% block page_title %}Data Overview{% endblock %}
+{% block head %}
+<style>
+.miss-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;width:70px;display:inline-block;vertical-align:middle;margin-right:7px}
+.miss-fill{height:100%;background:var(--d);border-radius:3px}
+.viz-img{width:100%;border-radius:9px;border:1px solid var(--border)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title"><i class="fas fa-database"></i> Dataset Overview</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="badge b-pri"><i class="fas fa-info-circle"></i> {{ overview.rows|int }} × {{ overview.columns|int }}</span>
+      <a href="/target" class="btn btn-pri btn-sm"><i class="fas fa-arrow-right"></i> Next: Select Target</a>
+    </div>
+  </div>
+  <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+    <div class="sc"><div class="sc-val">{{ overview.rows|int }}</div><div class="sc-lbl">Total Rows</div></div>
+    <div class="sc"><div class="sc-val">{{ overview.columns|int }}</div><div class="sc-lbl">Total Columns</div></div>
+    <div class="sc"><div class="sc-val">{{ "%.1f"|format(overview.missing_percentage) }}%</div><div class="sc-lbl">Missing Values</div></div>
+    <div class="sc"><div class="sc-val">{{ overview.duplicate_rows|int }}</div><div class="sc-lbl">Duplicate Rows</div></div>
+  </div>
+  <div>
+    <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--text2);margin-bottom:6px">
+      <span>Memory: <strong>{{ "%.2f"|format(overview.memory_usage) }} MB</strong></span>
+      <span>{{ "%.1f"|format(100-overview.missing_percentage) }}% complete</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:{{ 100-overview.missing_percentage }}%"></div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title"><i class="fas fa-columns"></i> Column Analysis</h2>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-sec btn-sm" onclick="filterCols('all')">All ({{ columns|length }})</button>
+      <button class="btn btn-sec btn-sm" onclick="filterCols('numeric')">Numeric</button>
+      <button class="btn btn-sec btn-sm" onclick="filterCols('categorical')">Categorical</button>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table class="data-table" id="ctbl">
+      <thead>
+        <tr><th>#</th><th>Column Name</th><th>Type</th><th>Unique</th><th>Missing %</th><th>Sample Values</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for col_name, col_info in columns.items() %}
+        <tr class="col-row" data-type="{{ col_info.type }}">
+          <td style="color:var(--text3);font-size:.76rem">{{ loop.index }}</td>
+          <td style="font-weight:600;font-family:'DM Mono',monospace;font-size:.82rem">{{ col_name }}</td>
+          <td>
+            <span class="badge {% if 'numeric' in col_info.type %}b-pri{% elif 'categorical' in col_info.type %}b-suc{% elif 'binary' in col_info.type %}b-warn{% else %}b-neu{% endif %}">{{ col_info.type }}</span>
+          </td>
+          <td style="font-family:'DM Mono',monospace;font-size:.82rem">{{ col_info.unique_values }}</td>
+          <td>
+            <div style="display:flex;align-items:center">
+              <div class="miss-bar"><div class="miss-fill" style="width:{{ col_info.null_percentage|int }}%"></div></div>
+              <span style="font-size:.8rem;font-family:'DM Mono',monospace">{{ "%.1f"|format(col_info.null_percentage) }}%</span>
+            </div>
+          </td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem;color:var(--text2)">{{ col_info.sample_values|join(', ') }}</td>
+          <td>
+            <button class="btn btn-sec btn-sm" onclick="showCol('{{ col_name }}')"><i class="fas fa-chart-bar"></i> Details</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if viz_data %}
+<div class="card">
+  <div class="card-head"><h2 class="card-title"><i class="fas fa-chart-area"></i> Visualizations</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px">
+    {% if viz_data.missing_heatmap %}<div><div style="font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:8px">Missing Values Heatmap</div><img src="data:image/png;base64,{{ viz_data.missing_heatmap }}" class="viz-img"></div>{% endif %}
+    {% if viz_data.distributions %}<div><div style="font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:8px">Feature Distributions</div><img src="data:image/png;base64,{{ viz_data.distributions }}" class="viz-img"></div>{% endif %}
+    {% if viz_data.correlation %}<div style="grid-column:1/-1"><div style="font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:8px">Correlation Matrix</div><img src="data:image/png;base64,{{ viz_data.correlation }}" class="viz-img"></div>{% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom:0">
+  <div class="card-head"><h2 class="card-title"><i class="fas fa-table"></i> Data Preview <span style="font-weight:400;color:var(--text3);">(First 10 Rows)</span></h2></div>
+  <div class="tbl-wrap" style="overflow-x:auto">{{ sample_data|safe }}</div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="colModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h3 style="font-size:1rem;font-weight:700" id="modalTitle">Column Details</h3>
+      <button onclick="closeModal()" class="btn btn-sec btn-sm"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function filterCols(t){document.querySelectorAll('.col-row').forEach(r=>{r.style.display=(t==='all'||r.dataset.type.includes(t))?'':'none'});}
+function showCol(n){
+  fetch('/api/column_stats/'+n).then(r=>r.json()).then(d=>{
+    document.getElementById('modalTitle').textContent=n;
+    let h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+    h+=`<div class="sc"><div class="sc-val" style="font-size:1rem">${d.type||'—'}</div><div class="sc-lbl">Type</div></div>`;
+    h+=`<div class="sc"><div class="sc-val" style="font-size:1rem">${d.unique_count||0}</div><div class="sc-lbl">Unique Values</div></div>`;
+    h+=`<div class="sc"><div class="sc-val" style="font-size:1rem">${d.missing_count||0}</div><div class="sc-lbl">Missing Count</div></div>`;
+    h+=`<div class="sc"><div class="sc-val" style="font-size:1rem">${d.missing_percentage?d.missing_percentage.toFixed(1)+'%':'0%'}</div><div class="sc-lbl">Missing %</div></div>`;
+    h+='</div>';
+    if(d.min!==undefined){
+      h+='<div style="border-top:1px solid var(--border2);padding-top:14px;margin-bottom:12px"><div style="font-size:.8rem;font-weight:600;margin-bottom:10px">Numeric Stats</div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">';
+      for(const[k,v] of [['Min',d.min],['Max',d.max],['Mean',d.mean],['Std',d.std]])
+        h+=`<div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center"><div style="font-size:.72rem;color:var(--text3)">${k}</div><div style="font-weight:700;font-size:.9rem;margin-top:3px">${typeof v==='number'?v.toFixed(2):v}</div></div>`;
+      h+='</div></div>';
+    }
+    if(d.sample_values){
+      h+='<div style="border-top:1px solid var(--border2);padding-top:14px"><div style="font-size:.8rem;font-weight:600;margin-bottom:8px">Sample Values</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+      d.sample_values.forEach(v=>h+=`<span class="chip">${v}</span>`);
+      h+='</div></div>';
+    }
+    document.getElementById('modalBody').innerHTML=h;
+    document.getElementById('colModal').classList.add('open');
+  }).catch(()=>{document.getElementById('modalBody').innerHTML='<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error loading details</div>';document.getElementById('colModal').classList.add('open');});
+}
+function closeModal(){document.getElementById('colModal').classList.remove('open');}
+document.getElementById('colModal').addEventListener('click',e=>{if(e.target===document.getElementById('colModal'))closeModal();});
+</script>
+{% endblock %}
